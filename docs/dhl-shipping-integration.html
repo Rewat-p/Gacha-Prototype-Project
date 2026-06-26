@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DHL Shipping Integration Guide — e29-shop-api</title>
+<style>
+  :root {
+    --dhl-yellow: #ffcc00;
+    --dhl-red: #d40511;
+    --ink: #1f2933;
+    --muted: #52606d;
+    --border: #e4e7eb;
+    --bg-code: #1e2733;
+    --bg-soft: #f5f7fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Sarabun", "Noto Sans Thai", Tahoma, sans-serif;
+    color: var(--ink);
+    line-height: 1.65;
+    margin: 0;
+    background: #fff;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px 96px; }
+  header.hero {
+    background: linear-gradient(100deg, var(--dhl-yellow) 0%, #ffe066 100%);
+    border-bottom: 6px solid var(--dhl-red);
+    padding: 40px 24px 32px;
+  }
+  header.hero .wrap { padding-bottom: 0; }
+  header.hero h1 { margin: 0 0 6px; font-size: 28px; color: #6b1d00; }
+  header.hero p { margin: 4px 0; color: #7a4a00; font-weight: 500; }
+  .badge {
+    display: inline-block; background: var(--dhl-red); color: #fff;
+    font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 12px;
+    letter-spacing: .5px; margin-bottom: 10px;
+  }
+  h2 {
+    margin-top: 48px; padding-top: 16px; border-top: 2px solid var(--border);
+    font-size: 22px; color: var(--dhl-red);
+  }
+  h3 { margin-top: 28px; font-size: 17px; color: var(--ink); }
+  h2 .num {
+    display: inline-block; background: var(--ink); color: #fff; font-size: 14px;
+    width: 28px; height: 28px; line-height: 28px; text-align: center;
+    border-radius: 6px; margin-right: 10px; vertical-align: middle;
+  }
+  p, li { color: var(--muted); }
+  code {
+    background: var(--bg-soft); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 5px; font-size: 13px;
+    font-family: "SF Mono", "Fira Code", Menlo, monospace; color: #0b5e8c;
+  }
+  pre {
+    background: var(--bg-code); color: #e6edf3; border-radius: 8px;
+    padding: 16px 18px; overflow-x: auto; font-size: 12.5px; line-height: 1.5;
+  }
+  pre code { background: none; border: none; color: inherit; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--border); padding: 8px 11px; text-align: left; vertical-align: top; }
+  th { background: var(--bg-soft); color: var(--ink); font-weight: 600; }
+  td code { font-size: 12px; }
+  .toc {
+    background: var(--bg-soft); border: 1px solid var(--border); border-radius: 10px;
+    padding: 18px 22px; margin: 28px 0;
+  }
+  .toc h2 { margin: 0 0 10px; border: none; padding: 0; font-size: 16px; color: var(--ink); }
+  .toc ol { margin: 0; padding-left: 20px; columns: 2; column-gap: 32px; }
+  .toc a { color: #0b5e8c; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .callout {
+    border-radius: 8px; padding: 14px 18px; margin: 18px 0; border-left: 5px solid;
+    font-size: 14px;
+  }
+  .callout p { margin: 6px 0; color: inherit; }
+  .callout.warn { background: #fff4e5; border-color: #f0a020; color: #6b4500; }
+  .callout.danger { background: #fdecea; border-color: var(--dhl-red); color: #8a0f12; }
+  .callout.info { background: #e7f3fb; border-color: #0b78c2; color: #0a4a78; }
+  .callout strong { color: inherit; }
+  .pill { font-size: 12px; padding: 1px 8px; border-radius: 10px; font-weight: 600; }
+  .pill.local { background: #e6f4ea; color: #1a7a3c; }
+  .pill.global { background: #e7eefb; color: #2a4ba0; }
+  .flow {
+    background: var(--bg-soft); border: 1px dashed var(--muted); border-radius: 8px;
+    padding: 14px 18px; font-family: "SF Mono", Menlo, monospace; font-size: 12.5px;
+    white-space: pre; overflow-x: auto; color: var(--ink);
+  }
+  footer { margin-top: 64px; padding-top: 20px; border-top: 2px solid var(--border); font-size: 13px; color: var(--muted); }
+  a.anchor-self { color: var(--muted); text-decoration: none; font-weight: 400; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap" style="padding-bottom:0;">
+    <span class="badge">INTERNAL TECHNICAL GUIDE</span>
+    <h1>DHL Shipping Integration Guide</h1>
+    <p>คู่มือ replicate การเชื่อมต่อ DHL ในระบบ <strong>e29-shop-api</strong> — สำหรับทีมที่ต้องการนำ pattern ไปใช้ในโปรเจกต์อื่น</p>
+    <p style="font-size:13px;">Stack: Node.js · Express · Sequelize (MySQL) · axios · PM2 cron &nbsp;|&nbsp; เอกสารนี้สรุปจากโค้ดจริงในโปรเจกต์</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="callout danger">
+  <p><strong>⚠️ Security — อ่านก่อน:</strong> เอกสารนี้ระบุเฉพาะ <em>ชื่อ</em> ของ environment variable เท่านั้น <strong>ไม่มีค่า credential จริง</strong> ทีมที่นำไปใช้ต้องขอ DHL account / credential ของตัวเอง อย่า copy ค่าจาก <code>.env</code> ของโปรเจกต์นี้ และควรเก็บ secret ใน vault / CI secret ไม่ commit ลง git</p>
+</div>
+
+<nav class="toc">
+  <h2>สารบัญ / Table of Contents</h2>
+  <ol>
+    <li><a href="#overview">Overview — DHL สองระบบ</a></li>
+    <li><a href="#flow">Architecture &amp; Data Flow</a></li>
+    <li><a href="#config">Configuration / Environment Variables</a></li>
+    <li><a href="#local-api">DHL Local (eCommerce) API</a></li>
+    <li><a href="#global-api">DHL Global (Express) API</a></li>
+    <li><a href="#cost">Shipping Cost Calculation</a></li>
+    <li><a href="#schema">Database Schema</a></li>
+    <li><a href="#cron">Tracking &amp; Auto Status Update (Cron)</a></li>
+    <li><a href="#storage">File / Label Storage</a></li>
+    <li><a href="#checklist">Replication Checklist</a></li>
+    <li><a href="#caveats">Caveats &amp; Known Limitations</a></li>
+    <li><a href="#filemap">Reference: File Map</a></li>
+  </ol>
+</nav>
+
+<!-- 1 -->
+<h2 id="overview"><span class="num">1</span>Overview — DHL สองระบบ</h2>
+<p>ระบบนี้เชื่อมต่อ DHL <strong>2 ระบบที่แยกกันโดยสิ้นเชิง</strong> โดยเลือกอัตโนมัติจากประเทศปลายทางของออเดอร์ (ดูจาก <code>country.cca2</code> ในตาราง <code>sm_addr_countries</code>):</p>
+
+<table>
+  <thead>
+    <tr><th>ระบบ</th><th>ใช้เมื่อ</th><th>DHL Product</th><th>API ที่เรียก</th><th>Authentication</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="pill local">DHL Local</span><br>eCommerce API</td>
+      <td>ปลายทาง = ไทย<br><code>cca2 == 'TH'</code></td>
+      <td>ในประเทศ (Domestic)</td>
+      <td>OAuth Token (v1), Label (v2), Tracking (v3)</td>
+      <td>Token-based<br>(clientId + password → accessToken)</td>
+    </tr>
+    <tr>
+      <td><span class="pill global">DHL Global</span><br>Express / MyDHL API</td>
+      <td>ปลายทาง = ต่างประเทศ<br><code>cca2 != 'TH'</code></td>
+      <td>ระหว่างประเทศ (International, Parcel "P")</td>
+      <td>POST /shipments (สร้าง label + invoice + customs ในครั้งเดียว)</td>
+      <td>HTTP Basic Auth<br>(username + password)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout info">
+  <p><strong>หลักการเลือก:</strong> ตอน admin กดสร้าง label ระบบจะ resolve ประเทศปลายทางก่อน ถ้าเป็นไทยใช้ <em>DHL Local</em> ถ้าไม่ใช่ไทยใช้ <em>DHL Global</em> — logic นี้อยู่ใน <code>controllers/v1/admin/order.js → createTracking()</code> (บรรทัด ~100 และ ~176)</p>
+</div>
+
+<!-- 2 -->
+<h2 id="flow"><span class="num">2</span>Architecture &amp; Data Flow</h2>
+<p>วงจรชีวิตของออเดอร์ตั้งแต่ลูกค้าสั่งจนสถานะอัปเดตอัตโนมัติ:</p>
+
+<div class="flow">[1] ลูกค้า checkout
+      │  worker: workers/manage.order.js
+      ▼
+[2] คำนวณค่าส่ง (shipping_fee)
+      ├─ ไทย  : เรต fixed ตามจำนวนชิ้น (80 / 100 / 150 บาท)
+      └─ ต่างประเทศ : SmDHLService.calculateByRegion() → lookup ตาราง sm_rate_shippings
+      ▼
+[3] สร้าง PurchaseOrder (สถานะ prepare)
+      ▼
+[4] Admin กดสร้าง label  (controllers/v1/admin/order.js → createTracking)
+      ├─ TH  → DHL Local : OAuth token → POST Label (v2) → ได้ PNG label (base64)
+      └─ INTL→ DHL Global: POST /shipments → ได้ PDF label + invoice + tracking number
+      ▼
+[5] เก็บไฟล์ลง public/images/orders/{poid}/...  +  insert แถวลง purchase_order_ship_tracks
+      ▼
+[6] Cron 23:45 ทุกวัน (crons/update-dhl-completed.js)
+      └─ ดึง tracking ของออเดอร์สถานะ prepare/shipped → map DHL event code → อัปเดตสถานะออเดอร์
+            event 77206 → shipped
+            event 77093 → completed</div>
+
+<!-- 3 -->
+<h2 id="config"><span class="num">3</span>Configuration / Environment Variables</h2>
+<p>config ถูกอ่านจาก <code>.env</code> เข้า <code>config.js</code> ใน 2 block: <code>config.dhl</code> (Local) และ <code>config.dhlGlobal</code> (Global)</p>
+
+<h3>DHL Local (eCommerce) — 7 ตัวแปร</h3>
+<table>
+  <thead><tr><th>Environment Variable</th><th>Maps to (config.js)</th><th>ความหมาย</th></tr></thead>
+  <tbody>
+    <tr><td><code>DHL_CLIENT_ID</code></td><td><code>dhl.clientId</code></td><td>Client ID สำหรับขอ access token</td></tr>
+    <tr><td><code>DHL_PASSWORD</code></td><td><code>dhl.password</code></td><td>Password คู่กับ client id</td></tr>
+    <tr><td><code>DHL_PICKUP_ID</code></td><td><code>dhl.pickupAccountId</code></td><td>Pickup Account ID (ส่งในทุก request)</td></tr>
+    <tr><td><code>DHL_SOLD_ID</code></td><td><code>dhl.soldToAccountId</code></td><td>Sold-To Account ID</td></tr>
+    <tr><td><code>DHL_API_TOKEN</code></td><td><code>dhl.api.token</code></td><td>URL endpoint ขอ access token</td></tr>
+    <tr><td><code>DHL_API_LABEL</code></td><td><code>dhl.api.label</code></td><td>URL endpoint สร้าง label</td></tr>
+    <tr><td><code>DHL_API_TRACKING</code></td><td><code>dhl.api.tracking</code></td><td>URL endpoint เช็คสถานะ tracking</td></tr>
+  </tbody>
+</table>
+
+<h3>DHL Global (Express) — 3 ตัวแปร</h3>
+<table>
+  <thead><tr><th>Environment Variable</th><th>Maps to (config.js)</th><th>ความหมาย</th></tr></thead>
+  <tbody>
+    <tr><td><code>DHL_GLOBAL_USER</code></td><td><code>dhlGlobal.username</code></td><td>Username สำหรับ Basic Auth</td></tr>
+    <tr><td><code>DHL_GLOBAL_PASSWORD</code></td><td><code>dhlGlobal.password</code></td><td>Password สำหรับ Basic Auth</td></tr>
+    <tr><td><code>DHL_GLOBAL_API_LABEL</code></td><td><code>dhlGlobal.api.label</code></td><td>URL endpoint สร้าง shipment (MyDHL)</td></tr>
+  </tbody>
+</table>
+
+<h3>โครงสร้างใน config.js</h3>
+<pre><code>dhl: {
+  clientId: process.env.DHL_CLIENT_ID || '',
+  password: process.env.DHL_PASSWORD || '',
+  pickupAccountId: process.env.DHL_PICKUP_ID || '',
+  soldToAccountId: process.env.DHL_SOLD_ID || '',
+  api: {
+    token:    process.env.DHL_API_TOKEN || '',
+    label:    process.env.DHL_API_LABEL || '',
+    tracking: process.env.DHL_API_TRACKING || '',
+  }
+},
+dhlGlobal: {
+  username: process.env.DHL_GLOBAL_USER || '',
+  password: process.env.DHL_GLOBAL_PASSWORD || '',
+  api: { label: process.env.DHL_GLOBAL_API_LABEL || '' }
+}</code></pre>
+
+<div class="callout info">
+  <p><strong>Endpoint ที่ใช้จริง (ตั้งค่าใน .env):</strong></p>
+  <p>Local Token: <code>https://api.dhlecommerce.dhl.com/rest/v1/OAuth/AccessToken</code><br>
+     Local Label: <code>https://api.dhlecommerce.dhl.com/rest/v2/Label</code><br>
+     Local Tracking: <code>https://api.dhlecommerce.dhl.com/rest/v3/Tracking</code><br>
+     Global Shipment: <code>https://express.api.dhl.com/mydhlapi/<strong>test</strong>/shipments</code> ← sandbox ดูข้อ 11</p>
+</div>
+
+<!-- 4 -->
+<h2 id="local-api"><span class="num">4</span>DHL Local (eCommerce) API</h2>
+<p>ใช้กับออเดอร์ปลายทางไทย ลำดับการเรียก: <strong>(a) ขอ token → (b) สร้าง label → (c) เช็ค tracking</strong> ทุก request ส่ง <code>accessToken</code> ใน header block (<code>hdr</code>) ของ body</p>
+
+<h3>(a) Get Access Token</h3>
+<pre><code>GET {DHL_API_TOKEN}
+  ?clientId={clientId}&password={password}&returnFormat=json
+
+// response — ต้องเช็ค code == '100000'
+accessTokenResponse.responseStatus.code   // '100000' = OK
+accessTokenResponse.token                 // นำไปใส่ใน request ถัดไป</code></pre>
+
+<h3>(b) Create Label</h3>
+<p><code>shipmentID</code> สร้างจาก pattern <code>THHNY{ลำดับ 2 หลัก}{poid}</code> เช่น <code>THHNY01PO12345</code> (ลำดับ = จำนวน tracking เดิม + 1)</p>
+<pre><code>POST {DHL_API_LABEL}
+{
+  "labelRequest": {
+    "hdr": {
+      "messageType": "LABEL",
+      "messageDateTime": "&lt;now&gt;",
+      "accessToken": "&lt;token&gt;",
+      "messageVersion": "1.4",
+      "messageLanguage": "th_TH"   // 'en' ถ้าไม่ใช่ไทย
+    },
+    "bd": {
+      "pickupAccountId": "&lt;pickupAccountId&gt;",
+      "soldToAccountId": "&lt;soldToAccountId&gt;",
+      "handoverMethod": 1,
+      "shipmentItems": [{
+        "shipmentID": "THHNY01PO12345",
+        "productCode": "ECO",
+        "totalWeight": 1200,          // หน่วยกรัม
+        "totalWeightUOM": "G",
+        "insuranceValue": null,
+        "currency": "THB",
+        "consigneeAddress": {
+          "name": "&lt;ชื่อผู้รับ&gt;",
+          "address1": "...", "address2": "...", "address3": "&lt;ตำบล&gt;",
+          "city": "&lt;อำเภอ&gt;", "state": "&lt;จังหวัด&gt;",
+          "country": "TH", "postCode": "10110", "phone": "08xxxxxxxx"
+        },
+        "returnMode": "01"
+      }],
+      "label": { "format": "PNG", "layout": "1x1" }
+    }
+  }
+}
+
+// response — ต้องเช็ค code == '200'
+labelResponse.bd.responseStatus.code        // '200' = OK
+labelResponse.bd.labels[0].shipmentID       // = tracking_ref
+labelResponse.bd.labels[0].content          // PNG เป็น base64 → เก็บเป็นไฟล์</code></pre>
+
+<h3>(c) Tracking</h3>
+<p>ส่งได้ทีละหลายเลข (โค้ด cron batch ครั้งละ 100) ผ่าน array <code>trackingReferenceNumber</code></p>
+<pre><code>POST {DHL_API_TRACKING}
+{
+  "trackItemRequest": {
+    "hdr": { "messageType": "TRACKITEM", "accessToken": "&lt;token&gt;",
+             "messageDateTime": "&lt;now&gt;", "messageLanguage": "th_TH" },
+    "bd": {
+      "pickupAccountId": "...", "soldToAccountId": "...",
+      "ePODRequired": "Y",
+      "trackingReferenceNumber": ["THHNY01PO12345", "THHNY01PO12346"]
+    }
+  }
+}
+
+// response — ต้องเช็ค code == '200'
+trackItemResponse.bd.shipmentItems[].events[].status
+//  '77206' = picked up / out for delivery → map เป็น "shipped"
+//  '77093' = delivered                    → map เป็น "completed"</code></pre>
+
+<!-- 5 -->
+<h2 id="global-api"><span class="num">5</span>DHL Global (Express / MyDHL) API</h2>
+<p>เรียกครั้งเดียวได้ครบ: สร้าง shipment + label + commercial invoice + customs declaration + ประเมินค่าส่ง ใช้ <strong>HTTP Basic Auth</strong> (axios <code>auth: {username, password}</code>)</p>
+
+<div class="callout warn">
+  <p><strong>หมายเหตุ field hardcode ในโค้ด</strong> (ทีมอื่นต้องเปลี่ยนเป็นของบริษัทตัวเอง): ข้อมูล <code>shipperDetails</code> (ที่อยู่ผู้ส่ง, เบอร์, email, เลข VAT <code>0125563023507</code>), account number <code>568963397</code>, ขนาดกล่อง <code>35×38×1</code> cm, <code>description: "Souvenir"</code>, <code>incoterm: "DAP"</code></p>
+</div>
+
+<pre><code>POST {DHL_GLOBAL_API_LABEL}        // Basic Auth: DHL_GLOBAL_USER / DHL_GLOBAL_PASSWORD
+{
+  "plannedShippingDateAndTime": "2026-06-26T10:00:00 GMT+07:00",
+  "pickup": { "isRequested": false },
+  "productCode": "P", "localProductCode": "P",
+  "getRateEstimates": true,
+  "estimatedDeliveryDate": { "isRequested": true },
+  "accounts": [
+    { "typeCode": "shipper", "number": "568963397" },
+    { "typeCode": "payer",   "number": "568963397" }
+  ],
+  // WY = Paperless Trade waybill — เปิดเฉพาะประเทศที่ country.plt_allowed_in = true
+  "valueAddedServices": [{ "serviceCode": "WY" }],
+  "outputImageProperties": {
+    "printerDPI": 300, "encodingFormat": "pdf",
+    "imageOptions": [
+      { "typeCode": "label",      "templateName": "ECOM26_84_001", "isRequested": true },
+      { "typeCode": "waybillDoc", "templateName": "ARCH_8X4",      "isRequested": true },
+      { "typeCode": "invoice",    "isRequested": true, "invoiceType": "commercial" }
+    ]
+  },
+  "customerReferences": [{ "value": "&lt;poid&gt;", "typeCode": "CU" }],
+  "customerDetails": {
+    "shipperDetails":  { /* ที่อยู่ผู้ส่ง hardcode (บริษัท) + registrationNumbers VAT */ },
+    "receiverDetails": { /* ที่อยู่ผู้รับจากออเดอร์ — postalCode ว่างถ้า country.no_postal_code */ }
+  },
+  "content": {
+    "packages": [{ "weight": 1.2, "dimensions": { "length": 35, "width": 38, "height": 1 } }],
+    "isCustomsDeclarable": true,
+    "declaredValue": 50.00, "declaredValueCurrency": "USD",
+    "exportDeclaration": {
+      "lineItems": [ /* map จาก order_detail: description, price_usd, qty, weight(kg) */ ],
+      "invoice": { "number": "&lt;poid&gt;", "date": "2026-06-20" },
+      "placeOfIncoterm": "&lt;จังหวัด&gt;, &lt;ประเทศ&gt;"
+    },
+    "description": "Souvenir", "incoterm": "DAP", "unitOfMeasurement": "metric"
+  }
+}</code></pre>
+
+<h3>Response fields ที่ใช้</h3>
+<pre><code>dhlGenLabel.data.shipmentTrackingNumber          // = tracking_ref
+dhlGenLabel.data.documents[]                      // typeCode: "label" | "invoice" | "waybillDoc"
+   .content                                       // PDF base64 → เก็บเป็นไฟล์ .pdf
+dhlGenLabel.data.shipmentCharges[]                // เลือกตัวที่ currencyType == 'BILLC'
+   .price                                          // → เก็บลง shipment_charges</code></pre>
+<p><span class="pill global">global</span> ต่างจาก local ตรงที่: น้ำหนักส่งเป็น <strong>กิโลกรัม</strong> (<code>totalWeight / 1000</code>), ได้ไฟล์เป็น <strong>PDF</strong>, มี invoice แยก, มี <code>shipment_charges</code></p>
+
+<!-- 6 -->
+<h2 id="cost"><span class="num">6</span>Shipping Cost Calculation</h2>
+<p>คำนวณตอนสร้างออเดอร์ใน <code>workers/manage.order.js</code> (เฉพาะเมื่อ <code>shipping_method_id == 1</code>; method 2 = ฟรี)</p>
+
+<h3>ปลายทางไทย — เรต fixed ตามจำนวนชิ้น</h3>
+<p>นับเฉพาะสินค้าที่ไม่ใช่ <code>is_shiping_free</code>:</p>
+<table>
+  <thead><tr><th>จำนวนชิ้น</th><th>ค่าส่ง (THB)</th></tr></thead>
+  <tbody>
+    <tr><td>1 – 4</td><td>80</td></tr>
+    <tr><td>5 – 7</td><td>100</td></tr>
+    <tr><td>≥ 8</td><td>150</td></tr>
+  </tbody>
+</table>
+<p>หมายเหตุ: API <code>calculateShippingCost</code> (<code>controllers/v1/sm/dhl.js</code>) มีสูตรไทยแบบอิงน้ำหนัก (<code>eco_bkk</code>/<code>eco_upc</code> + ส่วนเกิน kg ละ 25 บาท) แต่ route TH <strong>ถูก comment ปิดไว้</strong> ใน <code>routes/v1/sm/dhl.js</code></p>
+
+<h3>ปลายทางต่างประเทศ — lookup จากตาราง</h3>
+<p>ใช้ <code>SmDHLService.calculateByRegion(weight, region)</code> หาแถวใน <code>sm_rate_shippings</code> ที่ <code>weight_min ≤ weight ≤ weight_max</code> และ <code>region</code> ตรง แล้วใช้ค่า <code>eco_upc</code> (ถ้าน้ำหนักเกินช่วงสูงสุด ใช้ <code>eco_upc</code> ของแถว weight_max)</p>
+<pre><code>GET /api/v1/sm/dhl/shipping-cost/global?weight=1200&country=Japan&region=ASIA
+// → { success, ship_cost, country, region, weight }</code></pre>
+
+<!-- 7 -->
+<h2 id="schema"><span class="num">7</span>Database Schema</h2>
+
+<h3>purchase_order_ship_tracks <span style="font-weight:400;font-size:13px;">(ออเดอร์ลูกค้าทั่วไป)</span></h3>
+<table>
+  <thead><tr><th>Column</th><th>Type</th><th>หมายเหตุ</th></tr></thead>
+  <tbody>
+    <tr><td><code>order_id</code></td><td>INTEGER</td><td>FK → purchase_orders</td></tr>
+    <tr><td><code>poid</code></td><td>VARCHAR(50)</td><td>รหัสออเดอร์</td></tr>
+    <tr><td><code>dhl_type</code></td><td>VARCHAR(10)</td><td><code>'local'</code> | <code>'global'</code> (default local)</td></tr>
+    <tr><td><code>tracking_ref</code></td><td>VARCHAR(30)</td><td>shipmentID / tracking number ของ DHL</td></tr>
+    <tr><td><code>content_path</code></td><td>VARCHAR</td><td>path ไฟล์ label</td></tr>
+    <tr><td><code>content_invoice_path</code></td><td>VARCHAR</td><td>path ไฟล์ invoice (เฉพาะ global)</td></tr>
+    <tr><td><code>shipment_charges</code></td><td>FLOAT</td><td>ค่าส่งจาก DHL global (BILLC)</td></tr>
+    <tr><td><code>status</code></td><td>VARCHAR(10)</td><td>default <code>'active'</code></td></tr>
+    <tr><td><code>created_by</code> / <code>updated_by</code></td><td>INTEGER</td><td>admin user id</td></tr>
+  </tbody>
+</table>
+<p>Model มี virtual field <code>content</code> และ <code>content_invoice</code> ที่ prepend <code>config.baseURL</code> ให้เป็น URL เต็มอัตโนมัติ</p>
+
+<h3>am_purchase_order_shipping_tracks <span style="font-weight:400;font-size:13px;">(admin shop order)</span></h3>
+<p>โครงคล้ายกัน แต่ <strong>ไม่มี</strong> <code>dhl_type</code>, <code>content_invoice_path</code>, <code>shipment_charges</code> (รองรับ local อย่างเดียว)</p>
+
+<h3>sm_rate_shippings <span style="font-weight:400;font-size:13px;">(ตารางเรตค่าส่ง)</span></h3>
+<table>
+  <thead><tr><th>Column</th><th>Type</th><th>หมายเหตุ</th></tr></thead>
+  <tbody>
+    <tr><td><code>weight_min</code> / <code>weight_max</code></td><td>INTEGER</td><td>ช่วงน้ำหนัก (กรัม)</td></tr>
+    <tr><td><code>eco_bkk</code></td><td>INTEGER</td><td>เรตในเขต กทม.</td></tr>
+    <tr><td><code>eco_upc</code></td><td>INTEGER</td><td>เรตต่างจังหวัด / ต่างประเทศ</td></tr>
+    <tr><td><code>region</code></td><td>VARCHAR</td><td>โซนภูมิภาค (ใช้กับ global)</td></tr>
+  </tbody>
+</table>
+
+<h3>sm_addr_countries <span style="font-weight:400;font-size:13px;">(ตารางประเทศ)</span></h3>
+<table>
+  <thead><tr><th>Column</th><th>Type</th><th>หมายเหตุ</th></tr></thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>VARCHAR</td><td>ชื่อประเทศ (ใช้ join กับ order.shipping_country)</td></tr>
+    <tr><td><code>cca2</code></td><td>VARCHAR(20)</td><td>ISO-2 — <strong>ตัวตัดสิน TH vs INTL</strong> + ส่งให้ DHL</td></tr>
+    <tr><td><code>ccn3</code> / <code>cca3</code> / <code>cioc</code></td><td>VARCHAR(20)</td><td>รหัสประเทศมาตรฐานอื่น ๆ</td></tr>
+    <tr><td><code>region</code></td><td>VARCHAR</td><td>ใช้ lookup เรต global</td></tr>
+    <tr><td><code>plt_allowed_in</code></td><td>BOOLEAN</td><td>เปิด Paperless Trade (serviceCode WY)</td></tr>
+    <tr><td><code>no_postal_code</code></td><td>BOOLEAN</td><td>ประเทศที่ไม่มี postal code → ส่งค่าว่าง</td></tr>
+  </tbody>
+</table>
+<p>Migration ที่เพิ่มคอลัมน์ global: <code>migrations/20230131062456-add_collum_to_purchase_order_ship_track.js</code> (<code>dhl_type</code>, <code>content_invoice_path</code>, <code>shipment_charges</code>)</p>
+
+<!-- 8 -->
+<h2 id="cron"><span class="num">8</span>Tracking &amp; Auto Status Update (Cron)</h2>
+<p>ไฟล์ <code>crons/update-dhl-completed.js</code> รันโดย PM2 ตาม schedule <code>45 23 * * *</code> (ทุกวัน <strong>23:45</strong>) ตั้งใน <code>ecosystem.config.js</code> (process <code>e29-shop:update.dhl.completed.cron</code>) จบงานแล้ว <code>process.exit(0)</code></p>
+<p>ทำ 2 รอบ: <code>orderFromE29Shop()</code> (ตาราง purchase_orders, dhl_type='local') และ <code>orderFromE29ShopAdmin()</code> (ตาราง am_purchase_orders)</p>
+
+<h3>ขั้นตอน</h3>
+<ol>
+  <li>SELECT tracking ที่ <code>status='active'</code> และ order อยู่สถานะ <code>prepare</code> หรือ <code>shipped</code></li>
+  <li>ขอ access token จาก DHL (เช็ค code <code>100000</code>)</li>
+  <li>วนเป็น batch ครั้งละ 100 เลข → POST Tracking (เช็ค code <code>200</code>)</li>
+  <li>map event status → อัปเดตสถานะออเดอร์ผ่าน <code>updateStatusDhl(...)</code></li>
+</ol>
+
+<table>
+  <thead><tr><th>DHL Event Status</th><th>ความหมาย</th><th>อัปเดตสถานะออเดอร์เป็น</th></tr></thead>
+  <tbody>
+    <tr><td><code>77206</code></td><td>รับพัสดุ / กำลังนำส่ง</td><td><code>shipped</code> (เฉพาะถ้าตอนนี้เป็น <code>prepare</code>)</td></tr>
+    <tr><td><code>77093</code></td><td>นำส่งสำเร็จ</td><td><code>completed</code></td></tr>
+  </tbody>
+</table>
+
+<div class="callout warn">
+  <p><strong>เป็นแบบ Pull (polling) ไม่ใช่ Webhook</strong> — สถานะอัปเดตวันละครั้งเท่านั้น ทีมที่ต้อง near-realtime ควรพิจารณาเพิ่ม DHL webhook / ลดรอบ cron</p>
+</div>
+<p>การดูสถานะแบบ on-demand สำหรับ global ทำผ่าน <code>controllers/v1/purchase.js → trackingList()</code> ซึ่งคืน events ของ local แบบ live ส่วน global คืนเฉพาะข้อมูลที่เก็บไว้ (<code>dhl_type: 'global'</code>)</p>
+
+<!-- 9 -->
+<h2 id="storage"><span class="num">9</span>File / Label Storage</h2>
+<p>label/invoice ที่ได้เป็น base64 ถูก decode เขียนลง <code>public</code> directory (<code>config.publicDir</code>) ฟังก์ชันใน <code>services/v1/purchase.js</code></p>
+<table>
+  <thead><tr><th>ประเภท</th><th>ฟังก์ชัน</th><th>Path ที่เก็บ</th><th>นามสกุล</th></tr></thead>
+  <tbody>
+    <tr><td>Label (local)</td><td><code>saveTrackingLabel</code></td><td><code>images/orders/{poid}/label/{shipmentID}.png</code></td><td>PNG</td></tr>
+    <tr><td>Label (global)</td><td><code>saveTrackingLabel</code></td><td><code>images/orders/{poid}/label/{trackingNo}.pdf</code></td><td>PDF</td></tr>
+    <tr><td>Invoice (global)</td><td><code>saveTrackingInvoice</code></td><td><code>images/orders/{poid}/invoice/{trackingNo}.pdf</code></td><td>PDF</td></tr>
+    <tr><td>Label (admin shop)</td><td>(service shop) </td><td><code>images/admin_shop_order/{poid}/label/{shipmentID}.jpg</code></td><td>JPG</td></tr>
+  </tbody>
+</table>
+<p>ฟังก์ชัน <code>saveBase64()</code> ตัด prefix <code>data:...;base64,</code> ออกก่อนเขียนไฟล์ และ <code>mkdir</code> โฟลเดอร์ย่อยให้อัตโนมัติ คืนค่าเป็น relative path เก็บลง DB</p>
+
+<!-- 10 -->
+<h2 id="checklist"><span class="num">10</span>Replication Checklist</h2>
+<p>ขั้นตอนสำหรับนำ pattern นี้ไปใช้โปรเจกต์ใหม่:</p>
+<ol>
+  <li><strong>ขอ DHL account/credential</strong> ทั้ง eCommerce (clientId, password, pickup/sold account) และ Express/MyDHL (basic auth user/pass + shipper account number)</li>
+  <li><strong>ตั้ง environment variables</strong> 10 ตัวตามข้อ 3 (เก็บใน vault/CI secret อย่า commit)</li>
+  <li><strong>เพิ่ม config block</strong> <code>dhl</code> และ <code>dhlGlobal</code> ใน config loader</li>
+  <li><strong>สร้างตาราง</strong> shipping track (local/global), rate table, country table (อย่างน้อยต้องมี <code>cca2</code>, <code>region</code>, <code>plt_allowed_in</code>, <code>no_postal_code</code>) + seed ข้อมูลประเทศและเรต</li>
+  <li><strong>เปลี่ยนข้อมูล shipper ที่ hardcode</strong> ในตัวสร้าง global label (ที่อยู่บริษัท, VAT, account number, ขนาดกล่อง, description)</li>
+  <li><strong>ทำ endpoint สร้าง label</strong> ที่ branch ตาม <code>cca2 == 'TH'</code> → Local / มิฉะนั้น Global (อ้างอิง <code>createTracking</code>)</li>
+  <li><strong>ทำฟังก์ชันเก็บไฟล์</strong> base64 → label/invoice + insert tracking row</li>
+  <li><strong>ตั้ง cron</strong> polling tracking + map event code (<code>77206</code>/<code>77093</code>) เป็นสถานะออเดอร์</li>
+  <li><strong>ทดสอบบน sandbox</strong> ของ DHL ก่อน แล้วค่อยสลับ endpoint เป็น production</li>
+</ol>
+
+<!-- 11 -->
+<h2 id="caveats"><span class="num">11</span>Caveats &amp; Known Limitations</h2>
+<div class="callout danger">
+  <p><strong>1. Secrets ใน .env ถูก commit ลง git</strong> — โปรเจกต์ต้นทางมี credential DHL จริงใน repo ควร rotate ค่าเหล่านั้นและถอดออกจาก git history; ทีมใหม่อย่าทำตาม pattern นี้</p>
+</div>
+<div class="callout warn">
+  <p><strong>2. DHL Global ยังชี้ sandbox</strong> — <code>DHL_GLOBAL_API_LABEL</code> = <code>.../mydhlapi/<u>test</u>/shipments</code> ต้องเปลี่ยนเป็น production endpoint ก่อนใช้งานจริง</p>
+  <p><strong>3. ข้อมูล shipper hardcode</strong> ในโค้ด (ที่อยู่, VAT, account <code>568963397</code>, ขนาดกล่อง 35×38×1)</p>
+  <p><strong>4. อัปเดตสถานะแบบ cron วันละครั้ง</strong> (23:45) ไม่ใช่ webhook — ดีเลย์ได้ถึง ~24 ชม.</p>
+  <p><strong>5. Admin shop order ไม่รองรับส่งต่างประเทศ</strong> — <code>controllers/v1/admin/shop/order.js</code> โยน error “ระบบไม่รองรับการสร้าง label ส่งต่างประเทศ”</p>
+  <p><strong>6. Error handling จำกัด</strong> — global label ไม่เช็ค business code (อาศัย axios throw เมื่อ HTTP error); cron จับ error รายตัวแล้ว log ต่อ ไม่มี retry/alert</p>
+  <p><strong>7. axios เวอร์ชันเก่า (0.27.2)</strong> — ควรพิจารณาอัปเกรดเมื่อนำไปใช้ใหม่</p>
+</div>
+
+<!-- 12 -->
+<h2 id="filemap"><span class="num">12</span>Reference: File Map</h2>
+<table>
+  <thead><tr><th>ไฟล์</th><th>หน้าที่</th></tr></thead>
+  <tbody>
+    <tr><td><code>config.js</code> (54–72)</td><td>config block <code>dhl</code> + <code>dhlGlobal</code></td></tr>
+    <tr><td><code>controllers/v1/sm/dhl.js</code></td><td>คำนวณค่าส่ง (<code>calculateShippingCost</code>, <code>calculateShippingCostGlobal</code>)</td></tr>
+    <tr><td><code>services/v1/sm/dhl.js</code></td><td>lookup เรต (<code>calculateTH</code>, <code>calculateByRegion</code>)</td></tr>
+    <tr><td><code>routes/v1/sm/dhl.js</code></td><td>route ค่าส่ง (TH comment ปิด, เหลือ global)</td></tr>
+    <tr><td><code>controllers/v1/admin/order.js</code> (94–353)</td><td><code>createTracking</code> — สร้าง label local + global</td></tr>
+    <tr><td><code>controllers/v1/admin/shop/order.js</code> (260+)</td><td>สร้าง label admin shop (local only)</td></tr>
+    <tr><td><code>controllers/v1/purchase.js</code> (227+)</td><td><code>trackingList</code> — ดูสถานะ on-demand</td></tr>
+    <tr><td><code>services/v1/purchase.js</code></td><td><code>createOrderTracking</code>, <code>saveTrackingLabel</code>, <code>saveTrackingInvoice</code>, <code>saveBase64</code></td></tr>
+    <tr><td><code>services/v1/manage/shop/order.js</code></td><td>เวอร์ชัน admin shop ของ service ข้างบน</td></tr>
+    <tr><td><code>workers/manage.order.js</code></td><td>คำนวณ shipping_fee ตอนสร้างออเดอร์</td></tr>
+    <tr><td><code>crons/update-dhl-completed.js</code></td><td>cron อัปเดตสถานะอัตโนมัติ (23:45)</td></tr>
+    <tr><td><code>ecosystem.config.js</code></td><td>schedule PM2 ของ cron (<code>45 23 * * *</code>)</td></tr>
+    <tr><td><code>models/PurchaseOrderShipTrack.js</code></td><td>model ตาราง tracking (มี virtual URL field)</td></tr>
+    <tr><td><code>models/AmPurchaseOrderShippingTrack.js</code></td><td>model tracking ของ admin shop</td></tr>
+    <tr><td><code>models/SmRateShipping.js</code></td><td>model ตารางเรต</td></tr>
+    <tr><td><code>models/SmAddrCountry.js</code></td><td>model ตารางประเทศ</td></tr>
+    <tr><td><code>migrations/20230131062456-...</code></td><td>เพิ่มคอลัมน์ global ลง tracking</td></tr>
+  </tbody>
+</table>
+
+<footer>
+  <p>เอกสารนี้สรุปจากซอร์สโค้ดจริงของ <strong>e29-shop-api</strong> (branch main) — ใช้เพื่อส่งต่อความรู้ภายในทีม ไม่มีค่า credential จริงในเอกสาร · เปิดไฟล์นี้บน browser ได้โดยตรง</p>
+</footer>
+
+</div>
+</body>
+</html>
