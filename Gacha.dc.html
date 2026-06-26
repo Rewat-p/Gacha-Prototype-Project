@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:'Prompt',sans-serif;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:0;height:0}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@keyframes floatYs{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes auraPulse{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:.85;transform:translate(-50%,-50%) scale(1.12)}}
+@keyframes raySpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes twinkle{0%,100%{opacity:.25;transform:scale(.7) rotate(45deg)}50%{opacity:1;transform:scale(1.15) rotate(45deg)}}
+@keyframes sheen{0%{transform:translateX(-150%) skewX(-18deg)}60%,100%{transform:translateX(280%) skewX(-18deg)}}
+@keyframes revealCard{0%{transform:scale(.92) rotate(0)}8%{transform:scale(.94) rotate(-7deg)}16%{transform:scale(.94) rotate(7deg)}24%{transform:scale(.95) rotate(-6deg)}32%{transform:scale(.96) rotate(5deg)}40%{transform:scale(.97) rotate(-3deg)}48%{transform:scale(.98) rotate(0)}66%{transform:scale(1.12)}80%{transform:scale(1.24)}90%{transform:scale(1.45);opacity:1}100%{transform:scale(2.5);opacity:0}}
+@keyframes flashBurst{0%,68%{opacity:0}84%{opacity:.95}100%{opacity:0}}
+@keyframes rayGrow{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}35%{opacity:.6}100%{opacity:.9;transform:translate(-50%,-50%) scale(1.3)}}
+@keyframes popIn{0%{transform:scale(.72)}55%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes riseUp{0%{transform:translateY(12px)}100%{transform:translateY(0)}}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(600px) rotate(720deg);opacity:0}}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+</style>
+</helmet>
+<template id="__bundler_thumbnail" data-bg-color="#FFE7D8">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect x="470" y="250" width="260" height="320" rx="48" fill="#FFFFFF"/>
+    <circle cx="600" cy="378" r="78" fill="#FF6A45"/>
+    <text x="600" y="412" font-family="sans-serif" font-size="92" font-weight="700" fill="#FFFFFF" text-anchor="middle">?</text>
+    <circle cx="600" cy="510" r="9" fill="#FFC24B"/>
+  </svg>
+</template>
+<div style="min-height:100vh;width:100%;display:flex;align-items:center;justify-content:center;padding:28px;background:radial-gradient(130% 100% at 50% 0%, #F2EEF8 0%, #FBEFE7 52%, #FFE7D8 100%);font-family:'Prompt',sans-serif">
+<div style="position:relative;width:390px;height:844px;border-radius:46px;overflow:hidden;background:linear-gradient(180deg,#F6F2F9 0%,#FCF1EA 46%,#FFEFE3 100%);box-shadow:0 40px 90px rgba(70,45,30,.28),inset 0 0 0 1px rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.5)">
+
+  <div style="position:relative;z-index:5;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 34px">
+    <div style="font-weight:600;font-size:16px;color:#2B2520;letter-spacing:.5px">9:41</div>
+    <div style="display:flex;align-items:center;gap:7px">
+      <div style="display:flex;align-items:flex-end;gap:2px;height:11px">
+        <div style="width:3px;height:5px;background:#2B2520;border-radius:1px"></div>
+        <div style="width:3px;height:7px;background:#2B2520;border-radius:1px"></div>
+        <div style="width:3px;height:9px;background:#2B2520;border-radius:1px"></div>
+        <div style="width:3px;height:11px;background:#2B2520;border-radius:1px"></div>
+      </div>
+      <div style="font-size:11px;font-weight:600;color:#2B2520">5G</div>
+      <div style="display:flex;align-items:center;gap:2px"><div style="width:23px;height:12px;border:1.5px solid rgba(43,37,32,.55);border-radius:3px;padding:1.5px;display:flex"><div style="width:75%;background:#2B2520;border-radius:1px"></div></div><div style="width:2px;height:4px;background:rgba(43,37,32,.55);border-radius:1px"></div></div>
+    </div>
+  </div>
+
+  <sc-if value="{{ baseVisible }}" hint-placeholder-val="{{ true }}">
+  <div style="position:relative;z-index:4;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;padding:4px 20px 8px">
+    <div onClick="{{ goShop }}" style="display:flex;align-items:center;gap:8px;background:#fff;padding:7px 13px 7px 8px;border-radius:30px;box-shadow:0 6px 16px rgba(80,50,30,.10);cursor:pointer">
+      <div style="width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,#FFD45A,#FFA72C);box-shadow:inset 0 -2px 3px rgba(170,110,0,.45),inset 0 2px 2px rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center"><div style="width:12px;height:12px;border-radius:50%;border:1.5px solid rgba(255,255,255,.6)"></div></div>
+      <span style="font-weight:600;font-size:15px;color:#2B2520">{{ coins }}</span>
+      <div style="width:18px;height:18px;border-radius:50%;background:#FFF1E8;display:flex;align-items:center;justify-content:center;color:#FF6A45;font-weight:700;font-size:14px;line-height:1">+</div>
+    </div>
+    <div style="text-align:center;font-family:'Mitr',sans-serif;font-weight:500;font-size:17px;color:#2B2520">{{ headerTitle }}</div>
+    <div onClick="{{ goCollection }}" style="width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 6px 16px rgba(80,50,30,.10);display:flex;align-items:center;justify-content:center;cursor:pointer">
+      <div style="display:flex;flex-direction:column;gap:3px"><div style="width:15px;height:2px;background:#8C8378;border-radius:2px"></div><div style="width:15px;height:2px;background:#8C8378;border-radius:2px"></div><div style="width:10px;height:2px;background:#8C8378;border-radius:2px"></div></div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= HOME ================= -->
+  <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+  <div style="position:absolute;left:0;right:0;top:106px;bottom:0;display:flex;flex-direction:column;padding:0 20px 92px">
+    <div style="display:flex;justify-content:center;margin-bottom:4px">
+      <div style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.7);padding:7px 14px;border-radius:30px;box-shadow:0 4px 12px rgba(80,50,30,.07)">
+        <span style="font-size:13px">✨</span><span style="font-size:12px;font-weight:500;color:#9a5a36">กล่องสุ่มซีซั่นใหม่ · ลุ้นของระดับตำนาน</span>
+      </div>
+    </div>
+
+    <div style="position:relative;flex:1;display:flex;align-items:center;justify-content:center;min-height:0">
+      <div style="position:absolute;left:50%;top:48%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle, rgba(255,150,80,.5) 0%, rgba(255,150,80,0) 65%);transform:translate(-50%,-50%);animation:auraPulse 3.4s ease-in-out infinite"></div>
+      <div style="position:absolute;left:20%;top:24%;width:11px;height:11px;background:#FFC24B;border-radius:2px;animation:twinkle 2.6s ease-in-out infinite"></div>
+      <div style="position:absolute;right:18%;top:30%;width:8px;height:8px;background:#FF8A5C;border-radius:2px;animation:twinkle 3.1s .4s ease-in-out infinite"></div>
+      <div style="position:absolute;left:24%;bottom:24%;width:7px;height:7px;background:#FFB37A;border-radius:2px;animation:twinkle 2.4s .8s ease-in-out infinite"></div>
+      <div style="position:absolute;right:22%;bottom:28%;width:10px;height:10px;background:#FFC24B;border-radius:2px;animation:twinkle 2.9s .2s ease-in-out infinite"></div>
+
+      <div onClick="{{ onCtaClick }}" style="position:relative;width:168px;height:224px;cursor:pointer;animation:floatY 4s ease-in-out infinite">
+        <div style="position:absolute;inset:0;transform:rotate(-9deg) translateX(-12px);border-radius:26px;background:linear-gradient(160deg,#FFE7D6,#FFCBA8);box-shadow:0 14px 30px rgba(120,60,20,.16)"></div>
+        <div style="position:absolute;inset:0;transform:rotate(9deg) translateX(12px);border-radius:26px;background:linear-gradient(160deg,#FFE0CE,#FFC09A);box-shadow:0 14px 30px rgba(120,60,20,.16)"></div>
+        <div style="position:absolute;inset:0;border-radius:26px;overflow:hidden;background:linear-gradient(158deg,#FFFFFF 0%,#FFF1E7 100%);border:1px solid rgba(255,140,80,.3);box-shadow:0 22px 44px rgba(120,60,20,.24)">
+          <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,140,80,.16) 1.4px, transparent 1.6px);background-size:16px 16px;opacity:.6"></div>
+          <div style="position:absolute;top:0;left:0;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.75),transparent);animation:sheen 3.8s ease-in-out infinite"></div>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+            <div style="width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,#FF9A5A,#FF5E3A);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 24px rgba(255,90,50,.4)">
+              <span style="font-family:'Mitr',sans-serif;font-size:46px;font-weight:600;color:#fff">?</span>
+            </div>
+            <span style="font-family:'Mitr',sans-serif;font-weight:500;font-size:13px;color:#C0703F;letter-spacing:2px">MYSTERY</span>
+          </div>
+        </div>
+        <sc-if value="{{ showMascot }}" hint-placeholder-val="{{ true }}">
+        <div style="position:absolute;top:-32px;right:-28px;animation:floatYs 3s ease-in-out infinite">
+          <div style="position:relative;width:66px;height:58px">
+            <div style="position:absolute;inset:0;background:radial-gradient(120% 110% at 38% 28%, #FFE85B 0%, #FBD000 55%, #F2B600 100%);border-radius:50% 50% 47% 47% / 58% 58% 42% 42%;box-shadow:inset 0 -6px 10px rgba(190,130,0,.35), 0 8px 16px rgba(245,190,0,.35)"></div>
+            <div style="position:absolute;top:8px;right:13px;width:18px;height:12px;background:rgba(255,255,255,.9);border-radius:50%;transform:rotate(24deg)"></div>
+            <div style="position:absolute;top:27px;left:21px;width:7px;height:12px;background:#2A2620;border-radius:50%"></div>
+            <div style="position:absolute;top:27px;left:37px;width:7px;height:12px;background:#2A2620;border-radius:50%"></div>
+          </div>
+        </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div style="text-align:center;font-size:13px;color:#9a8a7a;margin:0 0 12px">แตะกล่องเพื่อเปิด · ลุ้นของหายากกันเลย!</div>
+
+    <div style="display:flex;justify-content:space-between;gap:8px;background:rgba(255,255,255,.66);border-radius:18px;padding:12px 14px;margin-bottom:14px;box-shadow:0 4px 12px rgba(80,50,30,.06)">
+      <sc-for list="{{ odds }}" as="o" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:5px;flex:1">
+          <div style="display:flex;align-items:center;gap:5px"><div style="width:8px;height:8px;border-radius:50%;background:{{ o.color }}"></div><span style="font-size:13px;font-weight:600;color:#2B2520">{{ o.pct }}</span></div>
+          <span style="font-size:10.5px;color:#9a8a7a">{{ o.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <div onClick="{{ onCtaClick }}" style-active="transform:scale(.97)" style="display:flex;align-items:center;justify-content:center;gap:11px;height:62px;border-radius:22px;background:linear-gradient(135deg,#FF9A5A,#FF5E3A);box-shadow:0 16px 30px rgba(255,90,45,.36);cursor:pointer">
+      <span style="font-family:'Mitr',sans-serif;font-weight:500;font-size:19px;color:#fff">{{ ctaLabel }}</span>
+      <div style="display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.22);padding:5px 11px;border-radius:20px">
+        <div style="width:17px;height:17px;border-radius:50%;background:linear-gradient(135deg,#FFE07A,#FFB02E);box-shadow:inset 0 -1px 2px rgba(170,110,0,.5);display:flex;align-items:center;justify-content:center"><div style="width:8px;height:8px;border-radius:50%;border:1.3px solid rgba(255,255,255,.7)"></div></div>
+        <span style="color:#fff;font-weight:600;font-size:14px">1</span>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= COLLECTION ================= -->
+  <sc-if value="{{ isCollection }}">
+  <div style="position:absolute;left:0;right:0;top:104px;bottom:0;display:flex;flex-direction:column;padding:0 20px 90px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><span style="font-family:'Mitr',sans-serif;font-weight:500;font-size:15px;color:#2B2520">ของสะสมของฉัน</span><span style="padding:3px 10px;border-radius:12px;background:#FFEEE3;color:#FF6A45;font-size:12px;font-weight:600">{{ invCount }} ชิ้น</span></div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+        <div onClick="{{ t.select }}" style="flex:1;text-align:center;padding:9px 4px;border-radius:14px;font-size:12px;font-weight:600;cursor:pointer;background:{{ t.bg }};color:{{ t.color }};box-shadow:{{ t.shadow }}">{{ t.label }}</div>
+      </sc-for>
+    </div>
+    <div style="flex:1;overflow-y:auto;min-height:0">
+      <sc-if value="{{ emptyInv }}">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:14px;color:#b6a596">
+          <div style="position:relative;width:66px;height:58px;opacity:.7">
+            <div style="position:absolute;inset:0;background:radial-gradient(120% 110% at 38% 28%, #FFE85B 0%, #FBD000 55%, #F2B600 100%);border-radius:50% 50% 47% 47% / 58% 58% 42% 42%"></div>
+            <div style="position:absolute;top:27px;left:21px;width:7px;height:12px;background:#2A2620;border-radius:50%"></div>
+            <div style="position:absolute;top:27px;left:37px;width:7px;height:12px;background:#2A2620;border-radius:50%"></div>
+          </div>
+          <span style="font-size:14px">ยังไม่มีของในหมวดนี้</span>
+        </div>
+      </sc-if>
+      <sc-if value="{{ notEmptyInv }}">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-bottom:10px">
+          <sc-for list="{{ invFiltered }}" as="item" hint-placeholder-count="4">
+            <div style="position:relative;border-radius:20px;padding:12px;background:#fff;box-shadow:0 6px 16px rgba(80,50,30,.08)">
+              <div style="position:relative;height:96px;border-radius:14px;background:{{ item.rSoft }};display:flex;align-items:center;justify-content:center;overflow:hidden">
+                <div style="position:absolute;top:8px;right:8px;padding:3px 9px;border-radius:12px;background:{{ item.rColor }};font-size:9.5px;font-weight:600;color:#fff">{{ item.rLabel }}</div>
+                <span style="font-size:46px">{{ item.emoji }}</span>
+              </div>
+              <div style="margin-top:10px;font-weight:600;font-size:13.5px;color:#2B2520;line-height:1.25">{{ item.name }}</div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:3px"><span style="font-size:11px;color:#a99a8a">{{ item.sub }}</span><span style="font-size:10.5px;color:#c3b5a6">{{ item.date }}</span></div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= SHOP ================= -->
+  <sc-if value="{{ isShop }}">
+  <div style="position:absolute;left:0;right:0;top:104px;bottom:0;display:flex;flex-direction:column;padding:0 20px 90px">
+    <div style="border-radius:24px;padding:20px;background:linear-gradient(135deg,#FF9A5A,#FF5E3A);box-shadow:0 16px 30px rgba(255,90,45,.30);display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div><div style="color:rgba(255,255,255,.85);font-size:13px">เหรียญของฉัน</div><div style="font-family:'Mitr',sans-serif;font-weight:600;font-size:34px;color:#fff;margin-top:2px">{{ coins }}</div></div>
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#FFE07A,#FFB02E);box-shadow:inset 0 -4px 6px rgba(180,120,0,.4),0 8px 16px rgba(255,160,40,.4);display:flex;align-items:center;justify-content:center"><div style="width:34px;height:34px;border-radius:50%;border:2px solid rgba(255,255,255,.65)"></div></div>
+    </div>
+    <div style="font-family:'Mitr',sans-serif;font-weight:500;font-size:15px;color:#2B2520;margin-bottom:12px">เลือกแพ็กเกจ</div>
+    <div style="display:flex;flex-direction:column;gap:14px;overflow-y:auto;min-height:0;padding-top:6px">
+      <sc-for list="{{ packages }}" as="p" hint-placeholder-count="4">
+        <div style="display:flex;align-items:center;gap:14px;padding:16px;border-radius:20px;background:#fff;box-shadow:0 6px 16px rgba(80,50,30,.08);position:relative">
+          <div style="width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,#FFF3DC,#FFE3B0);display:flex;align-items:center;justify-content:center;flex:0 0 auto"><div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#FFD45A,#FFA72C);box-shadow:inset 0 -3px 4px rgba(180,120,0,.4);display:flex;align-items:center;justify-content:center"><div style="width:17px;height:17px;border-radius:50%;border:1.6px solid rgba(255,255,255,.6)"></div></div></div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:baseline;gap:7px"><span style="font-family:'Mitr',sans-serif;font-weight:500;font-size:21px;color:#2B2520">{{ p.coins }}</span><span style="font-size:13px;color:#9a8a7a">เหรียญ</span></div>
+            <sc-if value="{{ p.bonusShow }}"><div style="margin-top:2px;font-size:12px;color:#FF7A2E;font-weight:600">+{{ p.bonus }} โบนัส</div></sc-if>
+          </div>
+          <div onClick="{{ p.buy }}" style-active="transform:scale(.95)" style="padding:10px 18px;border-radius:16px;background:linear-gradient(135deg,#FF9A5A,#FF5E3A);color:#fff;font-weight:600;font-size:14px;box-shadow:0 8px 18px rgba(255,90,45,.3);cursor:pointer">{{ p.price }}</div>
+          <sc-if value="{{ p.badge }}"><div style="position:absolute;top:-9px;left:18px;padding:3px 10px;border-radius:10px;background:{{ p.badgeColor }};color:#fff;font-size:10px;font-weight:600">{{ p.badge }}</div></sc-if>
+        </div>
+      </sc-for>
+      <div style="text-align:center;font-size:11px;color:#b6a596;padding:4px 0 6px">ระบบชำระเงินจำลองสำหรับตัวอย่างดีไซน์</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= BOTTOM NAV ================= -->
+  <sc-if value="{{ baseVisible }}" hint-placeholder-val="{{ true }}">
+  <div style="position:absolute;left:0;right:0;bottom:0;z-index:6;height:84px;background:rgba(255,255,255,.9);backdrop-filter:blur(14px);border-top:1px solid rgba(120,80,50,.08);display:flex;justify-content:space-around;align-items:flex-start;padding-top:14px">
+    <div onClick="{{ goHome }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;width:72px">
+      <div style="width:24px;height:24px;border-radius:8px;border:2.4px solid {{ homeCol }};display:flex;align-items:center;justify-content:center"><div style="width:6px;height:6px;border-radius:1px;background:{{ homeCol }};transform:rotate(45deg)"></div></div>
+      <span style="font-size:11px;font-weight:600;color:{{ homeCol }}">สุ่ม</span>
+    </div>
+    <div onClick="{{ goCollection }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;width:72px">
+      <div style="width:24px;height:24px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px"><div style="background:{{ colCol }};border-radius:3px"></div><div style="background:{{ colCol }};border-radius:3px"></div><div style="background:{{ colCol }};border-radius:3px"></div><div style="background:{{ colCol }};border-radius:3px"></div></div>
+      <span style="font-size:11px;font-weight:600;color:{{ colCol }}">ตู้เก็บ</span>
+    </div>
+    <div onClick="{{ goShop }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;width:72px">
+      <div style="width:24px;height:24px;border-radius:50%;border:2.4px solid {{ shopCol }};display:flex;align-items:center;justify-content:center"><div style="width:8px;height:8px;border-radius:50%;background:{{ shopCol }}"></div></div>
+      <span style="font-size:11px;font-weight:600;color:{{ shopCol }}">เติมเหรียญ</span>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ================= DRAWING OVERLAY ================= -->
+  <sc-if value="{{ isDrawing }}">
+  <div style="position:absolute;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(circle at 50% 46%, #3a2a22 0%, #211712 100%)">
+    <div style="position:absolute;left:50%;top:46%;width:560px;height:560px;transform:translate(-50%,-50%);animation:rayGrow 1.9s ease-out forwards">
+      <div style="width:100%;height:100%;border-radius:50%;animation:raySpin 5s linear infinite;background:conic-gradient(from 0deg, rgba(255,190,110,0) 0deg, rgba(255,190,110,.42) 14deg, rgba(255,190,110,0) 30deg, rgba(255,190,110,.42) 54deg, rgba(255,190,110,0) 70deg, rgba(255,190,110,.42) 94deg, rgba(255,190,110,0) 110deg, rgba(255,190,110,.42) 134deg, rgba(255,190,110,0) 150deg, rgba(255,190,110,.42) 174deg, rgba(255,190,110,0) 190deg, rgba(255,190,110,.42) 214deg, rgba(255,190,110,0) 230deg, rgba(255,190,110,.42) 254deg, rgba(255,190,110,0) 270deg, rgba(255,190,110,.42) 294deg, rgba(255,190,110,0) 310deg, rgba(255,190,110,.42) 334deg, rgba(255,190,110,0) 350deg, rgba(255,190,110,0) 360deg)"></div>
+    </div>
+    <div style="position:relative;width:170px;height:226px;animation:revealCard 1.9s cubic-bezier(.3,.1,.3,1) forwards">
+      <div style="position:absolute;inset:0;border-radius:26px;overflow:hidden;background:linear-gradient(158deg,#FFFFFF 0%,#FFF1E7 100%);border:1px solid rgba(255,140,80,.4);box-shadow:0 22px 50px rgba(255,120,50,.5)">
+        <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(255,140,80,.16) 1.4px, transparent 1.6px);background-size:16px 16px;opacity:.6"></div>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px">
+          <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#FF9A5A,#FF5E3A);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 24px rgba(255,90,50,.45)"><span style="font-family:'Mitr',sans-serif;font-size:48px;font-weight:600;color:#fff">?</span></div>
+          <span style="font-family:'Mitr',sans-serif;font-weight:500;font-size:13px;color:#C0703F;letter-spacing:2px">MYSTERY</span>
+        </div>
+      </div>
+    </div>
+    <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 46%, #fff, rgba(255,255,255,0) 58%);animation:flashBurst 1.9s ease-out forwards;pointer-events:none"></div>
+    <div style="position:absolute;bottom:120px;left:0;right:0;text-align:center;color:rgba(255,255,255,.85);font-family:'Mitr',sans-serif;font-weight:400;font-size:15px;letter-spacing:1px;animation:twinkle 1.2s ease-in-out infinite">กำลังเปิดกล่อง...</div>
+  </div>
+  </sc-if>
+
+  <!-- ================= RESULT OVERLAY ================= -->
+  <sc-if value="{{ isResult }}">
+  <div style="position:absolute;inset:0;z-index:25;overflow:hidden;background:radial-gradient(120% 80% at 50% 22%, #4a2c1c 0%, #2c1a12 55%, #1d120d 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px">
+    <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none">
+      <sc-for list="{{ confetti }}" as="cf" hint-placeholder-count="0">
+        <div style="position:absolute;top:-16px;left:{{ cf.left }};width:{{ cf.size }};height:{{ cf.size }};background:{{ cf.color }};border-radius:{{ cf.round }};animation:confettiFall {{ cf.dur }} {{ cf.delay }} ease-in forwards"></div>
+      </sc-for>
+    </div>
+    <div style="position:absolute;left:50%;top:42%;width:360px;height:360px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle, {{ current.rColor }}, transparent 62%);opacity:.55;animation:auraPulse 3s ease-in-out infinite"></div>
+    <span style="position:relative;font-family:'Mitr',sans-serif;font-weight:600;font-size:13px;letter-spacing:3px;color:{{ current.rColor }}">{{ currentRarityUpper }}</span>
+    <div style="position:relative;font-family:'Mitr',sans-serif;font-weight:600;font-size:30px;color:#fff;margin:6px 0 22px;text-shadow:0 2px 16px rgba(0,0,0,.4)">ยินดีด้วย!</div>
+    <div style="position:relative;width:230px;border-radius:28px;padding:22px 20px 24px;background:linear-gradient(180deg,#FFFFFF,#FFF6EF);box-shadow:0 26px 60px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.6);display:flex;flex-direction:column;align-items:center;gap:14px">
+      <div style="width:118px;height:118px;border-radius:26px;background:{{ current.rGrad }};display:flex;align-items:center;justify-content:center;font-size:60px;box-shadow:0 14px 32px {{ current.rColor }}">{{ current.emoji }}</div>
+      <div style="text-align:center">
+        <div style="font-family:'Mitr',sans-serif;font-weight:500;font-size:20px;color:#2B2520">{{ current.name }}</div>
+        <div style="font-size:13px;color:#9a8a7a;margin-top:2px">{{ current.sub }}</div>
+      </div>
+      <div style="padding:6px 16px;border-radius:20px;background:{{ current.rGrad }};font-size:12px;font-weight:600;color:#fff;letter-spacing:.5px">{{ current.rLabel }}</div>
+    </div>
+    <sc-if value="{{ showMascot }}">
+    <div style="position:relative;margin-top:18px;animation:floatYs 3s ease-in-out infinite">
+      <div style="position:relative;width:72px;height:64px">
+        <div style="position:absolute;inset:0;background:radial-gradient(120% 110% at 38% 28%, #FFE85B 0%, #FBD000 55%, #F2B600 100%);border-radius:50% 50% 47% 47% / 58% 58% 42% 42%;box-shadow:inset 0 -6px 10px rgba(190,130,0,.35), 0 8px 18px rgba(245,190,0,.4)"></div>
+        <div style="position:absolute;top:9px;right:14px;width:20px;height:13px;background:rgba(255,255,255,.9);border-radius:50%;transform:rotate(24deg)"></div>
+        <div style="position:absolute;top:30px;left:23px;width:7px;height:13px;background:#2A2620;border-radius:50%"></div>
+        <div style="position:absolute;top:30px;left:41px;width:7px;height:13px;background:#2A2620;border-radius:50%"></div>
+      </div>
+    </div>
+    </sc-if>
+    <div style="position:relative;display:flex;gap:12px;margin-top:20px;width:100%;max-width:300px">
+      <div onClick="{{ onClaim }}" style-active="transform:scale(.96)" style="flex:1;height:54px;border-radius:18px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:500;font-size:15px;cursor:pointer">เก็บเข้าตู้</div>
+      <div onClick="{{ onDrawAgain }}" style-active="transform:scale(.96)" style="flex:1.25;height:54px;border-radius:18px;background:linear-gradient(135deg,#FF9A5A,#FF5E3A);display:flex;align-items:center;justify-content:center;gap:8px;color:#fff;font-weight:600;font-size:15px;cursor:pointer;box-shadow:0 12px 24px rgba(255,90,45,.4)">{{ againLabel }}</div>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:446,&quot;height&quot;:900},&quot;startingCoins&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:24,&quot;min&quot;:0,&quot;max&quot;:999,&quot;tsType&quot;:&quot;number&quot;},&quot;showMascot&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;reduceMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = {
+    screen: 'home',
+    phase: null,
+    coins: (this.props && this.props.startingCoins != null) ? this.props.startingCoins : 24,
+    invTab: 'all',
+    current: null,
+    inventory: [
+      { name: 'คูปองส่วนลด 20%', sub: 'Drely Sport', type: 'voucher', emoji: '🎟️', rarity: 'rare', date: '24 มิ.ย.' },
+      { name: 'สกินจี๊ดจ๊าด', sub: 'Character Skin', type: 'item', emoji: '🦊', rarity: 'epic', date: '22 มิ.ย.' },
+      { name: 'เหรียญ +50', sub: 'Coin Pack', type: 'coin', emoji: '🪙', rarity: 'common', date: '21 มิ.ย.' },
+      { name: 'สติกเกอร์เซ็ต', sub: 'In-game Sticker', type: 'item', emoji: '🌈', rarity: 'common', date: '20 มิ.ย.' },
+      { name: 'กาแฟฟรี 1 แก้ว', sub: 'Cafe Voucher', type: 'voucher', emoji: '☕', rarity: 'rare', date: '18 มิ.ย.' },
+      { name: 'เสื้อลิมิเต็ด', sub: 'Limited Tee', type: 'merch', emoji: '👕', rarity: 'epic', date: '15 มิ.ย.' },
+    ],
+  };
+
+  RARITY = {
+    common:    { eng: 'COMMON',    label: 'ทั่วไป', color: '#8DA0B5', soft: '#EEF2F6', grad: 'linear-gradient(135deg,#AEB9C7,#8DA0B5)' },
+    rare:      { eng: 'RARE',      label: 'หายาก', color: '#3E8BF0', soft: '#E9F1FE', grad: 'linear-gradient(135deg,#5AA0FF,#3E8BF0)' },
+    epic:      { eng: 'EPIC',      label: 'อิพิค', color: '#9A5BE6', soft: '#F1E9FE', grad: 'linear-gradient(135deg,#B27BFF,#9A5BE6)' },
+    legendary: { eng: 'LEGENDARY', label: 'ตำนาน', color: '#FF9E2C', soft: '#FFF1DA', grad: 'linear-gradient(135deg,#FFC24B,#FF7A2E)' },
+  };
+
+  POOL = [
+    { name: 'เหรียญ +50', sub: 'Coin Pack', type: 'coin', emoji: '🪙', rarity: 'common' },
+    { name: 'สติกเกอร์เซ็ต', sub: 'In-game Sticker', type: 'item', emoji: '🌈', rarity: 'common' },
+    { name: 'ธีมโปรไฟล์', sub: 'Profile Theme', type: 'item', emoji: '🎨', rarity: 'common' },
+    { name: 'คูปองส่วนลด 20%', sub: 'Drely Sport', type: 'voucher', emoji: '🎟️', rarity: 'rare' },
+    { name: 'กาแฟฟรี 1 แก้ว', sub: 'Cafe Voucher', type: 'voucher', emoji: '☕', rarity: 'rare' },
+    { name: 'สกินจี๊ดจ๊าด', sub: 'Character Skin', type: 'item', emoji: '🦊', rarity: 'rare' },
+    { name: 'เอฟเฟกต์วิ่งพิเศษ', sub: 'Run Trail FX', type: 'item', emoji: '⚡', rarity: 'epic' },
+    { name: 'เสื้อลิมิเต็ด', sub: 'Limited Tee', type: 'merch', emoji: '👕', rarity: 'epic' },
+    { name: 'มงกุฎทองคำ', sub: 'Legendary Skin', type: 'item', emoji: '👑', rarity: 'legendary' },
+    { name: 'รองเท้ารุ่นพิเศษ', sub: 'Sneaker Drop', type: 'merch', emoji: '👟', rarity: 'legendary' },
+  ];
+
+  PACKAGES = [
+    { coins: 10,  price: '฿35',  bonus: 0 },
+    { coins: 55,  price: '฿159', bonus: 5 },
+    { coins: 140, price: '฿349', bonus: 20, hot: true },
+    { coins: 360, price: '฿790', bonus: 60, best: true },
+  ];
+
+  componentWillUnmount() { clearTimeout(this._t); }
+
+  decorate(p) {
+    const r = this.RARITY[p.rarity];
+    return Object.assign({}, p, { rLabel: r.label, rColor: r.color, rSoft: r.soft, rGrad: r.grad, rEng: r.eng });
+  }
+
+  pickPrize() {
+    const x = Math.random() * 100;
+    let tier = 'common';
+    if (x >= 94) tier = 'legendary';
+    else if (x >= 80) tier = 'epic';
+    else if (x >= 50) tier = 'rare';
+    const opts = this.POOL.filter(p => p.rarity === tier);
+    return this.decorate(opts[Math.floor(Math.random() * opts.length)]);
+  }
+
+  _startDraw() {
+    if (this.state.phase === 'drawing') return;
+    if (this.state.coins <= 0) { this.goShop(); return; }
+    const prize = this.pickPrize();
+    const cols = ['#FF8A5C', '#FFC24B', '#FF6A45', '#FFFFFF', '#FFD98A', prize.rColor];
+    const conf = [];
+    for (let i = 0; i < 30; i++) {
+      conf.push({
+        left: Math.round(Math.random() * 100) + '%',
+        size: (6 + Math.round(Math.random() * 8)) + 'px',
+        color: cols[i % cols.length],
+        delay: (Math.random() * 0.5).toFixed(2) + 's',
+        dur: (1.5 + Math.random() * 1.2).toFixed(2) + 's',
+        round: Math.random() > 0.5 ? '50%' : '2px',
+      });
+    }
+    this.setState({ coins: this.state.coins - 1, current: prize, phase: 'drawing', confetti: conf });
+    const d = (this.props && this.props.reduceMotion) ? 450 : 1900;
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ phase: 'result' }), d);
+  }
+
+  _claim() {
+    const c = this.state.current;
+    if (!c) return;
+    const item = Object.assign({}, c, { date: '26 มิ.ย.' });
+    this.setState(st => ({ inventory: [item, ...st.inventory] }));
+  }
+
+  onClaim = () => { this._claim(); this.setState({ phase: null, current: null }); };
+
+  onDrawAgain = () => {
+    this._claim();
+    if (this.state.coins > 0) { this.setState({ phase: null, current: null }); this._startDraw(); }
+    else { this.setState({ phase: null, current: null, screen: 'shop' }); }
+  };
+
+  buy(pk) { this.setState(st => ({ coins: st.coins + pk.coins + pk.bonus })); }
+
+  goHome = () => this.setState({ screen: 'home', phase: null, current: null });
+  goCollection = () => this.setState({ screen: 'collection', phase: null, current: null });
+  goShop = () => this.setState({ screen: 'shop', phase: null, current: null });
+
+  makeConfetti() {
+    const base = ['#FF8A5C', '#FFC24B', '#FF6A45', '#FFFFFF', '#FFD98A'];
+    const cur = this.state.current ? this.state.current.rColor : '#FF8A5C';
+    const colors = base.concat([cur, cur]);
+    const arr = [];
+    for (let i = 0; i < 32; i++) {
+      const left = Math.random() * 100;
+      const size = 6 + Math.random() * 8;
+      const delay = Math.random() * 0.5;
+      const dur = 1.5 + Math.random() * 1.3;
+      const color = colors[i % colors.length];
+      const round = Math.random() > 0.5 ? '50%' : '2px';
+      arr.push(React.createElement('div', {
+        key: i,
+        style: {
+          position: 'absolute', top: '-20px', left: left + '%',
+          width: size + 'px', height: size + 'px', background: color,
+          borderRadius: round, opacity: 0,
+          animation: 'confettiFall ' + dur + 's ' + delay + 's ease-in forwards',
+        },
+      }));
+    }
+    return arr;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const p = this.props || {};
+    const phase = s.phase;
+    const base = !phase;
+    const screen = s.screen;
+    const titles = { home: 'กาชาปอง', collection: 'ตู้เก็บของรางวัล', shop: 'เติมเหรียญ' };
+    const showMascot = p.showMascot !== false;
+
+    const odds = [
+      { pct: '50%', label: 'ทั่วไป', color: '#8DA0B5' },
+      { pct: '30%', label: 'หายาก', color: '#3E8BF0' },
+      { pct: '14%', label: 'อิพิค', color: '#9A5BE6' },
+      { pct: '6%',  label: 'ตำนาน', color: '#FF9E2C' },
+    ];
+
+    const tabDefs = [['all', 'ทั้งหมด'], ['item', 'ไอเทม'], ['voucher', 'คูปอง'], ['merch', 'ของจริง']];
+    const tabs = tabDefs.map(([id, label]) => {
+      const active = s.invTab === id;
+      return {
+        id, label, active,
+        bg: active ? 'linear-gradient(135deg,#FF9A5A,#FF5E3A)' : '#FFFFFF',
+        color: active ? '#FFFFFF' : '#9a8a7a',
+        shadow: active ? '0 8px 18px rgba(255,90,45,.30)' : '0 3px 10px rgba(80,50,30,.06)',
+        select: () => this.setState({ invTab: id }),
+      };
+    });
+
+    const inv = s.inventory.map(it => this.decorate(it));
+    const invFiltered = inv.filter(it => {
+      if (s.invTab === 'all') return true;
+      if (s.invTab === 'item') return it.type === 'item' || it.type === 'coin';
+      return it.type === s.invTab;
+    });
+
+    const packages = this.PACKAGES.map(pk => Object.assign({}, pk, {
+      buy: () => this.buy(pk),
+      bonusShow: pk.bonus > 0,
+      badge: pk.best ? 'คุ้มสุด' : (pk.hot ? 'ยอดนิยม' : null),
+      badgeColor: pk.best ? '#FF5E3A' : '#FF9E2C',
+    }));
+
+    const canDraw = s.coins > 0;
+
+    return {
+      coins: s.coins,
+      baseVisible: base,
+      isHome: base && screen === 'home',
+      isCollection: base && screen === 'collection',
+      isShop: base && screen === 'shop',
+      isDrawing: phase === 'drawing',
+      isResult: phase === 'result',
+      headerTitle: titles[screen],
+      showMascot,
+      odds, tabs, invFiltered, packages,
+      invCount: s.inventory.length,
+      emptyInv: invFiltered.length === 0,
+      notEmptyInv: invFiltered.length > 0,
+      current: s.current,
+      currentRarityUpper: s.current ? s.current.rEng : '',
+      confetti: s.confetti || [],
+      ctaLabel: canDraw ? 'สุ่มเลย' : 'เติมเหรียญก่อน',
+      againLabel: s.coins > 0 ? 'สุ่มอีกครั้ง' : 'เติมเหรียญ',
+      onCtaClick: () => canDraw ? this._startDraw() : this.goShop(),
+      onClaim: this.onClaim,
+      onDrawAgain: this.onDrawAgain,
+      goHome: this.goHome,
+      goCollection: this.goCollection,
+      goShop: this.goShop,
+      homeCol: screen === 'home' ? '#FF6A45' : '#BCAFA4',
+      colCol: screen === 'collection' ? '#FF6A45' : '#BCAFA4',
+      shopCol: screen === 'shop' ? '#FF6A45' : '#BCAFA4',
+    };
+  }
+}
+</script>
+</body>
+</html>
