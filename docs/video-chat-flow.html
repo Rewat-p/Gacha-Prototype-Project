@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flow การส่ง Video เข้า Chat — จุดหน่วง</title>
+<style>
+  :root {
+    /* neutrals — slate with a faint blue bias */
+    --bg: #f5f6f8;
+    --surface: #ffffff;
+    --surface-2: #eef0f4;
+    --border: #dfe3ea;
+    --ink: #1b2330;
+    --ink-2: #4a5568;
+    --ink-3: #78859a;
+    --accent: #d97706;      /* amber signal */
+    --accent-soft: #fef3e2;
+    --rail: #c9d0dc;
+
+    /* heat scale (severity) — same in both themes, tuned for contrast */
+    --heat-max: #dc2626;
+    --heat-high: #ea580c;
+    --heat-mid: #d97706;
+    --heat-low: #64748b;
+    --heat-max-bg: #fdecec;
+    --heat-high-bg: #fdeee3;
+    --heat-mid-bg: #fbf1de;
+    --heat-low-bg: #eef1f5;
+
+    /* actor colors */
+    --a-client: #2563eb;
+    --a-api: #7c3aed;
+    --a-cos: #0891b2;
+    --a-im: #059669;
+    --a-ci: #db2777;
+
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", "Sarabun", "Noto Sans Thai", "Thonburi", "Leelawadee UI", sans-serif;
+
+    --maxw: 940px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e131b;
+      --surface: #161d28;
+      --surface-2: #1d2632;
+      --border: #2a3644;
+      --ink: #e7ecf3;
+      --ink-2: #a8b3c4;
+      --ink-3: #71809a;
+      --accent: #f59e0b;
+      --accent-soft: #2a2011;
+      --rail: #33404f;
+
+      --heat-max: #f87171;
+      --heat-high: #fb923c;
+      --heat-mid: #fbbf24;
+      --heat-low: #94a3b8;
+      --heat-max-bg: #2a1618;
+      --heat-high-bg: #2a1c12;
+      --heat-mid-bg: #29220f;
+      --heat-low-bg: #1c2530;
+
+      --a-client: #60a5fa;
+      --a-api: #a78bfa;
+      --a-cos: #22d3ee;
+      --a-im: #34d399;
+      --a-ci: #f472b6;
+    }
+  }
+  /* explicit toggle overrides — must win both directions */
+  :root[data-theme="light"] {
+    --bg: #f5f6f8; --surface: #ffffff; --surface-2: #eef0f4; --border: #dfe3ea;
+    --ink: #1b2330; --ink-2: #4a5568; --ink-3: #78859a; --accent: #d97706;
+    --accent-soft: #fef3e2; --rail: #c9d0dc;
+    --heat-max: #dc2626; --heat-high: #ea580c; --heat-mid: #d97706; --heat-low: #64748b;
+    --heat-max-bg: #fdecec; --heat-high-bg: #fdeee3; --heat-mid-bg: #fbf1de; --heat-low-bg: #eef1f5;
+    --a-client: #2563eb; --a-api: #7c3aed; --a-cos: #0891b2; --a-im: #059669; --a-ci: #db2777;
+  }
+  :root[data-theme="dark"] {
+    --bg: #0e131b; --surface: #161d28; --surface-2: #1d2632; --border: #2a3644;
+    --ink: #e7ecf3; --ink-2: #a8b3c4; --ink-3: #71809a; --accent: #f59e0b;
+    --accent-soft: #2a2011; --rail: #33404f;
+    --heat-max: #f87171; --heat-high: #fb923c; --heat-mid: #fbbf24; --heat-low: #94a3b8;
+    --heat-max-bg: #2a1618; --heat-high-bg: #2a1c12; --heat-mid-bg: #29220f; --heat-low-bg: #1c2530;
+    --a-client: #60a5fa; --a-api: #a78bfa; --a-cos: #22d3ee; --a-im: #34d399; --a-ci: #f472b6;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+
+  /* ---------- header ---------- */
+  header { margin-bottom: 2.75rem; }
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 0.75rem;
+  }
+  h1 {
+    font-size: clamp(1.7rem, 4vw, 2.5rem);
+    line-height: 1.15;
+    margin: 0 0 0.9rem;
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+    font-weight: 700;
+  }
+  .lede {
+    font-size: 1.05rem;
+    color: var(--ink-2);
+    max-width: 62ch;
+    margin: 0;
+  }
+  .route-chip {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-family: var(--mono); font-size: .82rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: .35rem .7rem; margin-top: 1.25rem;
+    color: var(--ink);
+  }
+  .route-chip b { color: var(--accent); font-weight: 600; }
+
+  /* ---------- section ---------- */
+  section { margin-top: 3.25rem; }
+  .sec-head { display: flex; align-items: baseline; gap: .75rem; margin-bottom: 1.4rem; }
+  .sec-num {
+    font-family: var(--mono); font-size: .8rem; color: var(--ink-3);
+    border: 1px solid var(--border); border-radius: 6px; padding: .1rem .45rem;
+  }
+  h2 { font-size: 1.35rem; margin: 0; font-weight: 650; letter-spacing: -0.01em; }
+  .sec-sub { color: var(--ink-2); margin: .4rem 0 0; font-size: .96rem; }
+
+  /* ---------- actor legend ---------- */
+  .legend { display: flex; flex-wrap: wrap; gap: .5rem .9rem; margin: 0 0 1.75rem; }
+  .actor {
+    display: inline-flex; align-items: center; gap: .45rem;
+    font-size: .8rem; color: var(--ink-2);
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+  /* ---------- phase ---------- */
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.4rem 1.4rem 1.6rem;
+    margin-bottom: 1.4rem;
+  }
+  .phase-label {
+    display: flex; align-items: center; gap: .6rem;
+    font-size: .95rem; font-weight: 650; margin-bottom: 1.25rem;
+  }
+  .phase-tag {
+    font-family: var(--mono); font-size: .7rem; letter-spacing: .08em;
+    background: var(--surface-2); color: var(--ink-2);
+    border-radius: 5px; padding: .18rem .5rem;
+  }
+  .phase-note { color: var(--ink-3); font-size: .82rem; font-weight: 400; margin-left: auto; }
+
+  /* ---------- pipeline nodes ---------- */
+  .flow { display: flex; flex-direction: column; }
+  .node {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: 0 1rem;
+    position: relative;
+  }
+  .rail { display: flex; flex-direction: column; align-items: center; }
+  .marker {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: var(--mono); font-size: .82rem; font-weight: 600;
+    background: var(--surface); border: 2px solid var(--rail);
+    color: var(--ink-2); z-index: 1; flex: none;
+  }
+  .line { width: 2px; flex: 1 1 auto; background: var(--rail); min-height: 14px; }
+  .node:last-child .line { display: none; }
+
+  .card {
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--heat-low);
+    border-radius: 10px;
+    padding: .85rem 1rem;
+    margin-bottom: 12px;
+    background: var(--surface);
+  }
+  .node:last-child .card { margin-bottom: 0; }
+  .card.h-max  { border-left-color: var(--heat-max); }
+  .card.h-high { border-left-color: var(--heat-high); }
+  .card.h-mid  { border-left-color: var(--heat-mid); }
+  .card.h-low  { border-left-color: var(--heat-low); }
+
+  .card-top { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-bottom: .3rem; }
+  .card-title { font-weight: 600; font-size: .98rem; }
+  .badge {
+    font-size: .68rem; font-weight: 600; letter-spacing: .03em;
+    padding: .12rem .5rem; border-radius: 20px; white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .b-client { color: var(--a-client); background: color-mix(in srgb, var(--a-client) 12%, transparent); }
+  .b-api    { color: var(--a-api);    background: color-mix(in srgb, var(--a-api) 12%, transparent); }
+  .b-cos    { color: var(--a-cos);    background: color-mix(in srgb, var(--a-cos) 12%, transparent); }
+  .b-im     { color: var(--a-im);     background: color-mix(in srgb, var(--a-im) 12%, transparent); }
+  .b-ci     { color: var(--a-ci);     background: color-mix(in srgb, var(--a-ci) 12%, transparent); }
+
+  .heat {
+    margin-left: auto;
+    font-size: .68rem; font-weight: 700; letter-spacing: .04em;
+    padding: .14rem .55rem; border-radius: 6px; white-space: nowrap;
+  }
+  .heat.h-max  { color: var(--heat-max);  background: var(--heat-max-bg); }
+  .heat.h-high { color: var(--heat-high); background: var(--heat-high-bg); }
+  .heat.h-mid  { color: var(--heat-mid);  background: var(--heat-mid-bg); }
+  .heat.h-low  { color: var(--heat-low);  background: var(--heat-low-bg); }
+
+  .card-desc { color: var(--ink-2); font-size: .89rem; margin: .1rem 0 0; }
+  .card-desc code, .ref code, p code, li code {
+    font-family: var(--mono); font-size: .82em;
+    background: var(--surface-2); padding: .05rem .35rem; border-radius: 4px;
+    color: var(--ink); word-break: break-word;
+  }
+  .loop-flag {
+    display: inline-flex; align-items: center; gap: .35rem;
+    font-size: .72rem; color: var(--accent); font-weight: 600;
+    margin-top: .45rem;
+  }
+
+  /* ---------- callout ---------- */
+  .callout {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--accent-soft);
+    padding: 1.1rem 1.25rem;
+    margin-top: 1.5rem;
+    display: grid; grid-template-columns: auto 1fr; gap: .9rem;
+  }
+  .callout .ico { font-size: 1.4rem; line-height: 1; }
+  .callout h3 { margin: 0 0 .35rem; font-size: 1rem; color: var(--accent); }
+  .callout p { margin: 0; font-size: .9rem; color: var(--ink-2); }
+
+  /* ---------- table ---------- */
+  .table-scroll { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: .9rem; }
+  thead th {
+    text-align: left; font-weight: 600; font-size: .76rem; letter-spacing: .04em;
+    text-transform: uppercase; color: var(--ink-3);
+    padding: .8rem 1rem; background: var(--surface-2); white-space: nowrap;
+  }
+  tbody td { padding: .75rem 1rem; border-top: 1px solid var(--border); vertical-align: top; }
+  tbody tr { background: var(--surface); }
+  td.rank { font-family: var(--mono); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .sev-pill {
+    display: inline-block; font-size: .72rem; font-weight: 700;
+    padding: .1rem .5rem; border-radius: 6px; white-space: nowrap;
+  }
+  .sev-pill.h-max  { color: var(--heat-max);  background: var(--heat-max-bg); }
+  .sev-pill.h-high { color: var(--heat-high); background: var(--heat-high-bg); }
+  .sev-pill.h-mid  { color: var(--heat-mid);  background: var(--heat-mid-bg); }
+  .sev-pill.h-low  { color: var(--heat-low);  background: var(--heat-low-bg); }
+  .kind { font-size: .82rem; color: var(--ink-2); }
+  .kind b { color: var(--ink); font-weight: 600; }
+
+  /* ---------- recommendations ---------- */
+  .recs { display: grid; gap: .9rem; }
+  .rec {
+    display: grid; grid-template-columns: auto 1fr; gap: .9rem;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1rem 1.1rem;
+  }
+  .rec .n {
+    font-family: var(--mono); font-weight: 700; color: var(--accent);
+    font-size: 1rem; line-height: 1.5;
+  }
+  .rec h4 { margin: 0 0 .3rem; font-size: .96rem; }
+  .rec p { margin: 0; font-size: .87rem; color: var(--ink-2); }
+
+  /* ---------- refs ---------- */
+  .ref { font-family: var(--mono); font-size: .8rem; color: var(--ink-2); }
+  .ref ul { list-style: none; padding: 0; margin: 0; display: grid; gap: .55rem; }
+  .ref li { display: flex; gap: .6rem; flex-wrap: wrap; }
+  .ref .lbl { color: var(--ink); min-width: 12ch; }
+
+  footer {
+    margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
+    color: var(--ink-3); font-size: .8rem;
+  }
+  @media (max-width: 560px) {
+    .node { grid-template-columns: 34px 1fr; gap: 0 .7rem; }
+    .marker { width: 26px; height: 26px; font-size: .74rem; }
+    .heat { margin-left: 0; }
+    .callout, .rec { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- animated overview ---------- */
+  .overview {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.6rem 1.5rem 1.4rem;
+    margin: 2.25rem 0 0;
+  }
+  .ov-title {
+    display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+  .ov-title h2 { font-size: 1.05rem; margin: 0; font-weight: 650; }
+  .ov-title .hint { font-size: .78rem; color: var(--ink-3); margin-left: auto; }
+
+  .stage-scroll { overflow-x: auto; padding: 18px 2px 6px; }
+  .track {
+    position: relative;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    min-width: 560px;
+    padding: 0 6px;
+  }
+  /* base connector line behind stations */
+  .track::before {
+    content: ""; position: absolute; left: 46px; right: 46px; top: 27px;
+    height: 3px; border-radius: 3px;
+    background: var(--rail);
+    z-index: 0;
+  }
+  /* animated fill that grows as the packet advances */
+  .track-fill {
+    position: absolute; left: 46px; top: 27px; height: 3px; border-radius: 3px;
+    width: 0; max-width: calc(100% - 92px);
+    background: linear-gradient(90deg, var(--a-client), var(--a-api), var(--a-cos), var(--a-ci), var(--a-im));
+    z-index: 0;
+    transition: width .55s cubic-bezier(.4,0,.2,1);
+  }
+  .station {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center; gap: .55rem;
+    width: 92px; text-align: center;
+  }
+  .st-disc {
+    width: 54px; height: 54px; border-radius: 16px;
+    display: grid; place-items: center; font-size: 1.5rem;
+    background: var(--surface); border: 2px solid var(--rail);
+    transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease, background .35s ease;
+  }
+  .station.on .st-disc {
+    transform: translateY(-3px) scale(1.06);
+    border-color: var(--ac);
+    background: color-mix(in srgb, var(--ac) 14%, var(--surface));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--ac) 18%, transparent);
+  }
+  .station.done .st-disc { border-color: color-mix(in srgb, var(--ac) 55%, var(--rail)); }
+  .st-name { font-size: .74rem; font-weight: 600; color: var(--ink-2); line-height: 1.25; }
+  .station.on .st-name { color: var(--ink); }
+  .st-sub { font-size: .64rem; color: var(--ink-3); font-family: var(--mono); }
+
+  /* async transcode pulse on CI */
+  .st-async {
+    position: absolute; top: -6px; right: 8px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--a-ci); opacity: 0;
+    transition: opacity .3s ease;
+  }
+  .station.async-live .st-async { opacity: 1; animation: pulse 1.3s ease-in-out infinite; }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--a-ci) 60%, transparent); }
+    50%     { box-shadow: 0 0 0 7px color-mix(in srgb, var(--a-ci) 0%, transparent); }
+  }
+
+  /* traveling packet */
+  .packet {
+    position: absolute; top: 14px; left: 46px;
+    width: 30px; height: 30px; border-radius: 9px;
+    display: grid; place-items: center; font-size: .95rem;
+    background: var(--accent); color: #fff;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--accent) 45%, transparent);
+    transform: translateX(-50%);
+    transition: left .6s cubic-bezier(.45,.05,.35,1);
+    z-index: 3;
+  }
+
+  .ov-caption {
+    display: flex; align-items: center; gap: .6rem;
+    margin-top: 1.5rem; min-height: 1.5rem;
+    font-size: .92rem; color: var(--ink);
+  }
+  .ov-caption .step-no {
+    font-family: var(--mono); font-size: .72rem; font-weight: 700;
+    color: #fff; background: var(--accent);
+    border-radius: 6px; padding: .12rem .5rem; flex: none;
+  }
+  .ov-caption .cap-txt b { font-weight: 650; }
+  .ov-controls { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+  .ov-btn {
+    font: inherit; font-size: .78rem; cursor: pointer;
+    background: var(--surface-2); color: var(--ink-2);
+    border: 1px solid var(--border); border-radius: 7px; padding: .25rem .6rem;
+  }
+  .ov-btn:hover { color: var(--ink); }
+  .ov-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .packet, .st-disc, .track-fill, .station.async-live .st-async { transition: none; animation: none; }
+  }
+  @media (max-width: 560px) {
+    .ov-caption { flex-wrap: wrap; }
+    .ov-controls { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Latency Map · IM / PeepShare</p>
+    <h1>ส่ง Video เข้า Chat ล่าช้าจากจุดไหน?</h1>
+    <p class="lede">
+      การส่งไฟล์ video จาก app ไปแสดงใน chat ไม่ได้จบในคำขอเดียว แต่แบ่งเป็น
+      <b>2 เฟส</b> คนละ endpoint กัน เอกสารนี้ไล่ทุกขั้นตอนตั้งแต่ app กด "ส่ง"
+      จนข้อความถึงผู้รับ แล้วชี้ว่าเวลาส่วนใหญ่หมดไปกับจุดไหน
+    </p>
+    <span class="route-chip">🎬 endpoint ปลายทาง: <b>PUT&nbsp;/c2c/send/file_large</b></span>
+  </header>
+
+  <!-- ===================== ANIMATED OVERVIEW ===================== -->
+  <div class="overview">
+    <div class="ov-title">
+      <h2>เส้นทางของ video 1 ไฟล์</h2>
+      <span class="hint">เล่นวนอัตโนมัติ</span>
+    </div>
+
+    <div class="stage-scroll">
+      <div class="track" id="track">
+        <div class="track-fill" id="fill"></div>
+        <div class="packet" id="packet">🎬</div>
+
+        <div class="station" data-i="0" style="--ac:var(--a-client)">
+          <div class="st-disc">📱</div>
+          <div class="st-name">App / Client</div>
+          <div class="st-sub">ผู้ส่ง</div>
+        </div>
+        <div class="station" data-i="1" style="--ac:var(--a-api)">
+          <div class="st-disc">🖥️</div>
+          <div class="st-name">API Server</div>
+          <div class="st-sub">Node</div>
+        </div>
+        <div class="station" data-i="2" style="--ac:var(--a-cos)">
+          <div class="st-disc">🗄️</div>
+          <div class="st-name">Tencent COS</div>
+          <div class="st-sub">เก็บไฟล์</div>
+        </div>
+        <div class="station" data-i="3" style="--ac:var(--a-ci)">
+          <span class="st-async"></span>
+          <div class="st-disc">🎞️</div>
+          <div class="st-name">Tencent CI</div>
+          <div class="st-sub">transcode</div>
+        </div>
+        <div class="station" data-i="4" style="--ac:var(--a-im)">
+          <div class="st-disc">💬</div>
+          <div class="st-name">Tencent IM</div>
+          <div class="st-sub">→ ผู้รับ</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ov-caption">
+      <span class="step-no" id="capNo">1</span>
+      <span class="cap-txt" id="capTxt">แอปเตรียมส่ง video</span>
+      <div class="ov-controls">
+        <button class="ov-btn" id="ovToggle" type="button" aria-label="เล่น / หยุดชั่วคราว">⏸ หยุด</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const stations = Array.from(document.querySelectorAll('.station'))
+      const packet = document.getElementById('packet')
+      const fill = document.getElementById('fill')
+      const track = document.getElementById('track')
+      const capNo = document.getElementById('capNo')
+      const capTxt = document.getElementById('capTxt')
+      const toggleBtn = document.getElementById('ovToggle')
+
+      // step -> { station index the packet lands on, caption, ci async? }
+      const steps = [
+        { i: 0, html: 'แอปเตรียมส่ง video' },
+        { i: 1, html: 'ส่ง video <b>ทีละ chunk</b> ขึ้น server แล้วประกอบไฟล์บน disk' },
+        { i: 2, html: 'API อัป video <b>เต็มไฟล์</b> ขึ้น Tencent COS' },
+        { i: 3, html: 'สั่ง <b>transcode FHD</b> แบบ async — ไม่รอผล ทำงานเบื้องหลังต่อ', async: true },
+        { i: 4, html: 'ส่งข้อความเข้า chat → <b>ผู้รับได้รับทันที</b> (เปิด video ต้นฉบับได้เลย)' },
+      ]
+
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      let cur = -1
+      let timer = null
+      let playing = !reduce
+
+      function centerOf(el) {
+        const tb = track.getBoundingClientRect()
+        const b = el.getBoundingClientRect()
+        return b.left - tb.left + b.width / 2
+      }
+
+      function render(step) {
+        const s = steps[step]
+        stations.forEach((st, idx) => {
+          st.classList.toggle('on', idx === s.i)
+          st.classList.toggle('done', idx < s.i)
+        })
+        // async pulse on CI stays lit once triggered, through the rest of the loop
+        const ci = stations[3]
+        if (s.async) ci.classList.add('async-live')
+        if (step === 0) ci.classList.remove('async-live')
+
+        packet.style.left = centerOf(stations[s.i]) + 'px'
+        const x = centerOf(stations[s.i])
+        fill.style.width = Math.max(0, x - 46) + 'px'
+
+        capNo.textContent = step + 1
+        capTxt.innerHTML = s.html
+      }
+
+      function advance() {
+        cur = (cur + 1) % steps.length
+        render(cur)
+      }
+
+      function play() {
+        playing = true
+        toggleBtn.textContent = '⏸ หยุด'
+        clearInterval(timer)
+        timer = setInterval(advance, 2100)
+      }
+      function pause() {
+        playing = false
+        toggleBtn.textContent = '▶ เล่น'
+        clearInterval(timer)
+      }
+
+      toggleBtn.addEventListener('click', () => (playing ? pause() : (advance(), play())))
+      window.addEventListener('resize', () => { if (cur >= 0) render(cur) })
+
+      // init
+      advance()
+      if (reduce) {
+        // no motion: show final state, mark all done, expose full path
+        stations.forEach((st) => st.classList.add('done'))
+        stations[3].classList.add('async-live')
+        fill.style.width = 'calc(100% - 92px)'
+        capNo.textContent = '·'
+        capTxt.innerHTML = 'App → API → COS → CI (transcode) → IM → ผู้รับ'
+        packet.style.display = 'none'
+        toggleBtn.style.display = 'none'
+      } else {
+        play()
+      }
+    })()
+  </script>
+
+  <div class="legend">
+    <span class="actor"><span class="dot" style="background:var(--a-client)"></span>App / Client</span>
+    <span class="actor"><span class="dot" style="background:var(--a-api)"></span>API Server (Node)</span>
+    <span class="actor"><span class="dot" style="background:var(--a-cos)"></span>Tencent COS</span>
+    <span class="actor"><span class="dot" style="background:var(--a-ci)"></span>Tencent CI (transcode)</span>
+    <span class="actor"><span class="dot" style="background:var(--a-im)"></span>Tencent IM</span>
+  </div>
+
+  <!-- ===================== FLOW ===================== -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <div>
+        <h2>Flow ทั้งหมด แบบ step-by-step</h2>
+        <p class="sec-sub">ทุก step ในเฟส B ทำงานแบบ synchronous อยู่ใน HTTP request เดียว — response จะไม่กลับจนกว่าจะครบทุกขั้น</p>
+      </div>
+    </div>
+
+    <!-- PHASE A -->
+    <div class="phase">
+      <div class="phase-label">
+        <span class="phase-tag">PHASE&nbsp;A</span>
+        Chunked Upload — ดันไฟล์ video ขึ้น server ก่อน
+        <span class="phase-note">เกิด <b>ก่อน</b> ถึง route ที่ถาม · คนละ endpoint</span>
+      </div>
+
+      <div class="flow">
+        <div class="node">
+          <div class="rail"><div class="marker">1</div><div class="line"></div></div>
+          <div class="card h-low">
+            <div class="card-top">
+              <span class="card-title">เปิดงาน upload</span>
+              <span class="badge b-client">App</span><span class="badge b-api">API</span>
+              <span class="heat h-low">ต่ำ</span>
+            </div>
+            <p class="card-desc">
+              <code>POST /multipart/initiate</code> — สร้าง record ใน MongoDB (<code>UploadMultiparts</code>)
+              แล้วคืน <code>uploadId</code> กลับไป ทำแค่ DB อย่างเดียว จึงเร็ว
+            </p>
+          </div>
+        </div>
+
+        <div class="node">
+          <div class="rail"><div class="marker">2</div><div class="line"></div></div>
+          <div class="card h-max">
+            <div class="card-top">
+              <span class="card-title">ส่งไฟล์ทีละ chunk</span>
+              <span class="badge b-client">App</span><span class="badge b-api">API</span>
+              <span class="heat h-max">สูงสุด</span>
+            </div>
+            <p class="card-desc">
+              <code>PUT /multipart/upload_part</code> — client ตัดไฟล์เป็นก้อนแล้วส่งทีละก้อน
+              (1 HTTP request ต่อ 1 chunk) การโอน<b>ทั้งไฟล์</b>ผ่าน network คือเวลาที่ผู้ใช้รู้สึกนานที่สุด
+              limit ต่อ upload สูงถึง 50&nbsp;GB
+            </p>
+            <span class="loop-flag">↻ วนซ้ำจนครบทุก chunk · เรียงลำดับ</span>
+          </div>
+        </div>
+
+        <div class="node">
+          <div class="rail"><div class="marker">3</div><div class="line"></div></div>
+          <div class="card h-high">
+            <div class="card-top">
+              <span class="card-title">ประกอบไฟล์บน disk (synchronous)</span>
+              <span class="badge b-api">API</span>
+              <span class="heat h-high">สูง</span>
+            </div>
+            <p class="card-desc">
+              ทุก chunk ที่เข้ามา server ใช้ <code>fs.readFileSync</code> + <code>fs.appendFileSync</code>
+              + <code>fs.unlinkSync</code> ต่อไฟล์เข้าด้วยกัน และ <code>fs.renameSync</code> ตอน chunk สุดท้าย
+              — เป็น sync call ที่ <b>block Node event loop</b> จึงหน่วงทั้งการ upload นี้และ request อื่น ๆ ที่วิ่งพร้อมกัน
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE B -->
+    <div class="phase">
+      <div class="phase-label">
+        <span class="phase-tag">PHASE&nbsp;B</span>
+        Publish — <code style="font-family:var(--mono);font-size:.85em">PUT /c2c/send/file_large</code>
+        <span class="phase-note">route ที่โจทย์ชี้มา</span>
+      </div>
+
+      <div class="flow">
+        <div class="node">
+          <div class="rail"><div class="marker">4</div><div class="line"></div></div>
+          <div class="card h-low">
+            <div class="card-top">
+              <span class="card-title">รับ thumbnail + ตรวจสิทธิ์</span>
+              <span class="badge b-client">App</span><span class="badge b-api">API</span>
+              <span class="heat h-low">ต่ำ</span>
+            </div>
+            <p class="card-desc">
+              <code>uploadSingleFile</code> (multer) รับแค่รูป <b>thumbnail</b> ไม่ใช่ตัว video —
+              ตัว video ถูกดันขึ้นไปแล้วในเฟส A จากนั้น <code>checkUploadId</code> lookup MongoDB
+              เพื่อหา record ไฟล์ที่ประกอบเสร็จแล้วบน disk
+            </p>
+          </div>
+        </div>
+
+        <div class="node">
+          <div class="rail"><div class="marker">5</div><div class="line"></div></div>
+          <div class="card h-high">
+            <div class="card-top">
+              <span class="card-title">อัปโหลด video เต็มไฟล์ขึ้น COS</span>
+              <span class="badge b-api">API</span><span class="badge b-cos">COS</span>
+              <span class="heat h-high">สูง</span>
+            </div>
+            <p class="card-desc">
+              <code>uploadFileToCos</code> อ่านไฟล์จาก disk แล้วส่งขึ้น Tencent COS แบบ multipart
+              (SliceSize 5&nbsp;MB) — เป็นการโอนไฟล์ใหญ่รอบที่สอง (server → COS) เวลาแปรตามขนาดไฟล์
+              และ request รอจนอัปเสร็จ
+            </p>
+          </div>
+        </div>
+
+        <div class="node">
+          <div class="rail"><div class="marker">6</div><div class="line"></div></div>
+          <div class="card h-mid">
+            <div class="card-top">
+              <span class="card-title">Probe metadata + trigger transcode</span>
+              <span class="badge b-api">API</span><span class="badge b-ci">CI</span>
+              <span class="heat h-mid">กลาง</span>
+            </div>
+            <p class="card-desc">
+              <code>getMediaInfo</code> ยิงไปถาม Tencent CI ว่าไฟล์กว้างเท่าไร (network round-trip)
+              ถ้า <code>width &gt; 1920</code> จะยิง <code>triggerTranscodeJob</code> สร้างงาน transcode
+              เป็น FHD (template <code>H264-MP4-ake</code>) — <b>แค่สั่งงานแล้วไปต่อ ไม่รอ transcode เสร็จ</b>
+            </p>
+          </div>
+        </div>
+
+        <div class="node">
+          <div class="rail"><div class="marker">7</div><div class="line"></div></div>
+          <div class="card h-mid">
+            <div class="card-top">
+              <span class="card-title">อัป thumbnail + หาความยาว video</span>
+              <span class="badge b-api">API</span><span class="badge b-cos">COS</span>
+              <span class="heat h-mid">กลาง</span>
+            </div>
+            <p class="card-desc">
+              อัป thumbnail ขึ้น COS (ก้อนเล็ก) แล้ว <code>getVideoDurationInSeconds</code> รัน
+              <b>ffprobe</b> บนไฟล์ video local เพื่อดึงความยาว — การ spawn process นี้มีต้นทุนคงที่ที่รู้สึกได้
+              ปิดท้ายด้วยเขียน log record ลง MongoDB
+            </p>
+          </div>
+        </div>
+
+        <div class="node">
+          <div class="rail"><div class="marker">8</div><div class="line"></div></div>
+          <div class="card h-low">
+            <div class="card-top">
+              <span class="card-title">ส่งข้อความเข้า Tencent IM</span>
+              <span class="badge b-api">API</span><span class="badge b-im">IM</span>
+              <span class="heat h-low">ต่ำ</span>
+            </div>
+            <p class="card-desc">
+              <code>sendC2CMsg</code> → <code>TencentServices.sendMsg</code> POST ไปที่ REST API
+              <code>/openim/sendmsg</code> พร้อม <code>MsgBody</code> (ชี้ไป video ต้นฉบับบน COS)
+              และ <code>cloudCustomData</code> ที่แนบ URL ของไฟล์ FHD ที่กำลัง transcode
+            </p>
+          </div>
+        </div>
+
+        <div class="node">
+          <div class="rail"><div class="marker">9</div></div>
+          <div class="card h-low">
+            <div class="card-top">
+              <span class="card-title">Cleanup + ตอบกลับ</span>
+              <span class="badge b-api">API</span>
+              <span class="heat h-low">ต่ำ</span>
+            </div>
+            <p class="card-desc">
+              ลบ multipart record และลบ thumbnail temp บน disk แล้วจึงตอบ
+              <code>success</code> กลับไปที่ app — จบ request
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="ico">⚠️</div>
+      <div>
+        <h3>Transcode ทำแบบ async — วิดีโอ FHD อาจยังเปิดไม่ได้ทันที</h3>
+        <p>
+          งาน transcode ถูก "สั่ง" แล้วปล่อยให้ Tencent CI ทำเบื้องหลัง โค้ดไม่ poll และไม่มี webhook มา reconcile
+          ผู้รับจะเปิด video <b>ต้นฉบับ</b> (<code>VideoUrl</code>) ได้ทันที แต่ URL ไฟล์ FHD ใน
+          <code>cloudCustomData.VideoTranscode.url</code> อาจ 404 อยู่ช่วงหนึ่งจนกว่า CI จะ transcode เสร็จ
+          — นี่เป็นความล่าช้าที่ "มองไม่เห็น" ใน request แต่ผู้ใช้ปลายทางเจอ
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== RANKING ===================== -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <div>
+        <h2>จัดอันดับจุดหน่วง</h2>
+        <p class="sec-sub">เรียงตามผลกระทบต่อเวลารวม · "scale ตามขนาด" = ยิ่งไฟล์ใหญ่ยิ่งช้า, "คงที่" = ต้นทุนเกือบเท่าเดิมทุกไฟล์</p>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr><th>#</th><th>จุด</th><th>เฟส</th><th>ประเภท</th><th>ความรุนแรง</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="rank">1</td>
+            <td>Client → API ส่ง chunk ทั้งไฟล์ผ่าน network</td>
+            <td>A</td>
+            <td class="kind"><b>scale ตามขนาด</b> + bandwidth</td>
+            <td><span class="sev-pill h-max">สูงสุด</span></td>
+          </tr>
+          <tr>
+            <td class="rank">2</td>
+            <td>ประกอบ chunk บน disk แบบ sync (block event loop)</td>
+            <td>A</td>
+            <td class="kind"><b>scale ตามขนาด</b></td>
+            <td><span class="sev-pill h-high">สูง</span></td>
+          </tr>
+          <tr>
+            <td class="rank">3</td>
+            <td>อัป video API → COS (multipart 5MB)</td>
+            <td>B</td>
+            <td class="kind"><b>scale ตามขนาด</b></td>
+            <td><span class="sev-pill h-high">สูง</span></td>
+          </tr>
+          <tr>
+            <td class="rank">4</td>
+            <td><code>getMediaInfo</code> ถาม CI (network round-trip)</td>
+            <td>B</td>
+            <td class="kind">คงที่</td>
+            <td><span class="sev-pill h-mid">กลาง</span></td>
+          </tr>
+          <tr>
+            <td class="rank">5</td>
+            <td>ffprobe หาความยาว video (spawn process)</td>
+            <td>B</td>
+            <td class="kind">คงที่</td>
+            <td><span class="sev-pill h-mid">กลาง</span></td>
+          </tr>
+          <tr>
+            <td class="rank">6</td>
+            <td>อัป thumbnail COS + trigger transcode job</td>
+            <td>B</td>
+            <td class="kind">คงที่</td>
+            <td><span class="sev-pill h-low">ต่ำ</span></td>
+          </tr>
+          <tr>
+            <td class="rank">7</td>
+            <td>Tencent IM <code>sendmsg</code></td>
+            <td>B</td>
+            <td class="kind">คงที่</td>
+            <td><span class="sev-pill h-low">ต่ำ</span></td>
+          </tr>
+          <tr>
+            <td class="rank">8</td>
+            <td>MongoDB writes / deletes</td>
+            <td>A+B</td>
+            <td class="kind">คงที่</td>
+            <td><span class="sev-pill h-low">ต่ำ</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== RECOMMENDATIONS ===================== -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <div>
+        <h2>ข้อเสนอแนะสำหรับ dev</h2>
+        <p class="sec-sub">เรียงตามผลตอบแทนต่อความพยายาม — ตัดตัวการอันดับ 1–3 ก่อน</p>
+      </div>
+    </div>
+
+    <div class="recs">
+      <div class="rec">
+        <div class="n">A</div>
+        <div>
+          <h4>เลี่ยง double-hop: ให้ client อัปเข้า COS ตรง ๆ</h4>
+          <p>
+            ตอนนี้ไฟล์เดินทางสองรอบ — client→API (เฟส A) แล้ว API→COS (step 5) ถ้าใช้
+            <b>pre-signed URL / COS multipart ฝั่ง client</b> ให้ app อัปเข้า COS โดยตรง
+            จะตัดทั้งการโอนรอบสอง, การประกอบไฟล์บน disk, และภาระ disk ของ server ออกได้พร้อมกัน
+            (แก้อันดับ 1, 2, 3 ทีเดียว)
+          </p>
+        </div>
+      </div>
+      <div class="rec">
+        <div class="n">B</div>
+        <div>
+          <h4>เปลี่ยน sync fs เป็น async / stream</h4>
+          <p>
+            ถ้ายังคงประกอบไฟล์บน server ให้เปลี่ยน <code>readFileSync</code>/<code>appendFileSync</code>
+            เป็น stream (<code>createWriteStream</code> + <code>pipe</code>) เพื่อไม่ให้ block event loop
+            — ลดผลกระทบที่ลามไปยัง request อื่นทั้งระบบ
+          </p>
+        </div>
+      </div>
+      <div class="rec">
+        <div class="n">C</div>
+        <div>
+          <h4>Stream API → COS แทนอ่านทั้งไฟล์จาก disk</h4>
+          <p>
+            หากไฟล์อยู่ที่ COS อยู่แล้ว (ข้อ A) ก็ไม่ต้องอัปซ้ำเลย แต่ถ้ายังต้องผ่าน server
+            ให้ stream ตรงจาก disk เข้า COS เพื่อลด peak memory และ latency
+          </p>
+        </div>
+      </div>
+      <div class="rec">
+        <div class="n">D</div>
+        <div>
+          <h4>สื่อสาร transcode ที่ยังไม่พร้อมให้ผู้ใช้เข้าใจ</h4>
+          <p>
+            เพิ่ม callback/webhook จาก CI หรือให้ client fallback ไป <code>VideoUrl</code> ต้นฉบับ
+            ระหว่างรอ FHD เพื่อไม่ให้ผู้รับเจอ video ที่ยังเปิดไม่ได้ (จุด "หน่วงที่มองไม่เห็น")
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== REFS ===================== -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <div><h2>อ้างอิงในโค้ด</h2></div>
+    </div>
+    <div class="ref">
+      <ul>
+        <li><span class="lbl">route</span><code>routes/api/chat/c2c/c2c.v2.js:21-27</code></li>
+        <li><span class="lbl">controller</span><code>controllers/v2/chat/c2c.js:89-170</code></li>
+        <li><span class="lbl">เฟส B service</span><code>services/v2/chat/send_file_large.js:48-229</code> (uploadFileToCos), <code>:231-275</code> (transcode), <code>:321-354</code> (sendC2CMsg)</li>
+        <li><span class="lbl">multipart</span><code>controllers/v2/upload/multipart/multipart.v1.js:29-66</code> (ประกอบ chunk), <code>middlewares/v2/upload/multipart/multipart.v1.js:80-100</code> (checkUploadId)</li>
+        <li><span class="lbl">thumbnail multer</span><code>middlewares/v2/chat/message.js:8-91</code></li>
+        <li><span class="lbl">transcode lib</span><code>libs/tencent/mediaProcessing.js:44-80</code></li>
+        <li><span class="lbl">IM sendmsg</span><code>services/v1/tencent.js:805-809</code></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    Latency map จากการอ่านโค้ด branch <code style="font-family:var(--mono)">develop</code> ·
+    ความรุนแรงเป็นการประเมินเชิงเปรียบเทียบ (ยังไม่มีข้อมูล profiling จริง)
+  </footer>
+</div>
+
+</body>
+</html>
