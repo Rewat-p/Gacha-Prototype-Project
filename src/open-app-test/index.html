@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Peepshare – เปิดแอป</title>
-<script>
+<!-- <script>
   // ===== ตั้งค่า =====
   var DEEP_LINK = "peepshare://im.peepshare.me/profile/YyXQVeCP";
   var FALLBACK_DELAY = 2000; // ms ก่อนถือว่าเปิดแอปไม่สำเร็จ
@@ -14,7 +14,16 @@
   var isIOS = /iPhone|iPad|iPod/i.test(ua) ||
               (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); // iPadOS
   var isMobile = isAndroid || isIOS || /Mobi/i.test(ua);
-</script>
+
+  try {
+    // เปิดแอปทันทีตั้งแต่เริ่มโหลดหน้า (เฉพาะ mobile)
+    if (isMobile) {
+      window.location.href = DEEP_LINK;
+    }
+  } catch (error) {
+    console.log('DEEP_LINK Error:',error)
+  }
+</script> -->
 <style>
   :root {
     --bg: #eef3f8; --ink: #1d2a38; --muted: #5c6b7a; --accent: #2f6fed; --card: #ffffff;
@@ -39,6 +48,12 @@
     text-decoration: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 1rem;
   }
   .btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  .input {
+    display: block; width: 100%; box-sizing: border-box; margin: 0 0 12px; padding: 12px;
+    border: 1px solid var(--muted); border-radius: 10px; background: var(--bg); color: var(--ink);
+    font-size: 1rem; font-family: inherit;
+  }
+  .input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
   pre {
     margin: 20px 0 0; font-size: .78rem; white-space: pre-wrap; word-break: break-all;
     color: var(--muted); background: var(--bg); padding: 12px; border-radius: 8px;
@@ -49,6 +64,7 @@
   <div class="box">
     <h1 id="title">กำลังเปิดแอป Peepshare…</h1>
     <p id="msg">ถ้าแอปไม่เปิดขึ้นมา กดปุ่มด้านล่างเพื่อลองอีกครั้ง</p>
+    <input class="input" id="linkInput" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="peepshare://...">
     <a class="btn" id="openBtn" href="#">เปิดในแอป</a>
     <pre id="log"></pre>
   </div>
@@ -57,7 +73,27 @@
   var logEl = document.getElementById("log");
   function log(t) { logEl.textContent += "[" + new Date().toLocaleTimeString() + "] " + t + "\n"; }
 
-  document.getElementById("openBtn").href = DEEP_LINK;
+  var DEEP_LINK = "peepshare://im.peepshare.me/profile/YyXQVeCP";
+  var FALLBACK_DELAY = 2000; // ms ก่อนถือว่าเปิดแอปไม่สำเร็จ
+
+  var ua = navigator.userAgent || "";
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) ||
+              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); // iPadOS
+  var isMobile = isAndroid || isIOS || /Mobi/i.test(ua);
+
+  var linkInput = document.getElementById("linkInput");
+  linkInput.value = DEEP_LINK;
+
+  // กดปุ่ม → เปิดลิงก์จากค่าใน text input
+  document.getElementById("openBtn").addEventListener("click", function (e) {
+    e.preventDefault();
+    var link = linkInput.value.trim();
+    if (!link) { log("กรุณาใส่ลิงก์ก่อน"); linkInput.focus(); return; }
+    log("เปิดลิงก์: " + link);
+    window.location.href = link;
+  });
+
   log("UA: " + ua);
   log("Platform: " + (isIOS ? "iOS" : isAndroid ? "Android" : "Desktop/อื่นๆ"));
   log("Deep link: " + DEEP_LINK);
@@ -80,15 +116,6 @@
         log("ผ่านไป " + FALLBACK_DELAY + "ms หน้ายังแสดงอยู่ → เปิดแอปไม่สำเร็จ");
       }
     }, FALLBACK_DELAY);
-  }
-
-  try {
-    // เปิดแอปทันทีตั้งแต่เริ่มโหลดหน้า (เฉพาะ mobile)
-    if (isMobile) {
-      window.location.href = DEEP_LINK;
-    }
-  } catch (error) {
-    console.log('DEEP_LINK Error:',error)
   }
 </script>
 </body>
