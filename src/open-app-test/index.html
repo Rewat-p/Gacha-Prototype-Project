@@ -4,22 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Peepshare – เปิดแอป</title>
-<script>
-  // ===== ตั้งค่า =====
-  var DEEP_LINK = "peepshare://im.peepshare.me/profile/YyXQVeCP";
-  var FALLBACK_DELAY = 2000; // ms ก่อนถือว่าเปิดแอปไม่สำเร็จ
 
-  var ua = navigator.userAgent || "";
-  var isAndroid = /Android/i.test(ua);
-  var isIOS = /iPhone|iPad|iPod/i.test(ua) ||
-              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); // iPadOS
-  var isMobile = isAndroid || isIOS || /Mobi/i.test(ua);
-
-  // เปิดแอปทันทีตั้งแต่เริ่มโหลดหน้า (เฉพาะ mobile)
-  if (isMobile) {
-    window.location.href = DEEP_LINK;
-  }
-</script>
 <style>
   :root {
     --bg: #eef3f8; --ink: #1d2a38; --muted: #5c6b7a; --accent: #2f6fed; --card: #ffffff;
@@ -85,6 +70,26 @@
         log("ผ่านไป " + FALLBACK_DELAY + "ms หน้ายังแสดงอยู่ → เปิดแอปไม่สำเร็จ");
       }
     }, FALLBACK_DELAY);
+  }
+</script>
+<script>
+  // ===== ตั้งค่า =====
+  var DEEP_LINK = "peepshare://im.peepshare.me/profile/YyXQVeCP";
+  var FALLBACK_DELAY = 2000; // ms ก่อนถือว่าเปิดแอปไม่สำเร็จ
+
+  var ua = navigator.userAgent || "";
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) ||
+              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); // iPadOS
+  var isMobile = isAndroid || isIOS || /Mobi/i.test(ua);
+
+  try {
+    // เปิดแอปทันทีตั้งแต่เริ่มโหลดหน้า (เฉพาะ mobile)
+    if (isMobile) {
+      window.location.href = DEEP_LINK;
+    }
+  } catch (error) {
+    console.log('DEEP_LINK Error:',error)
   }
 </script>
 </body>
