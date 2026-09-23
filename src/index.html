@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>รวมหน้าทดสอบ</title>
+<style>
+  :root {
+    --bg: #eef3f8; --ink: #1d2a38; --muted: #5c6b7a; --accent: #2f6fed; --card: #ffffff; --line: #dbe3ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121a24; --ink: #e6edf5; --muted: #93a3b5; --accent: #6b9bff; --card: #1c2632; --line: #2a3644; }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "Sarabun", "Noto Sans Thai", system-ui, sans-serif;
+    padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+  }
+  main { max-width: 520px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; margin: 8px 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 24px; }
+  ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+  a.item {
+    display: block; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 20px; text-decoration: none; color: inherit;
+  }
+  a.item:hover { border-color: var(--accent); }
+  a.item:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .name { font-weight: 600; font-size: 1.05rem; color: var(--accent); }
+  .desc { color: var(--muted); font-size: .92rem; line-height: 1.5; margin-top: 4px; }
+</style>
+</head>
+<body>
+  <main>
+    <h1>รวมหน้าทดสอบ</h1>
+    <p class="sub">เลือกหัวข้อที่ต้องการทดสอบ</p>
+    <ul>
+      <li>
+        <a class="item" href="open-app-test/index.html">
+          <div class="name">Test Open App</div>
+          <div class="desc">ทดสอบเปิดแอป Peepshare ผ่าน deep link (ให้เปิดบนมือถือ iOS / Android)</div>
+        </a>
+      </li>
+    </ul>
+  </main>
+</body>
+</html>

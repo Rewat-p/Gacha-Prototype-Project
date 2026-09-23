@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Peepshare – เปิดแอป</title>
+<script>
+  // ===== ตั้งค่า =====
+  var DEEP_LINK = "peepshare://im.peepshare.me/profile/YyXQVeCP";
+  var FALLBACK_DELAY = 2000; // ms ก่อนถือว่าเปิดแอปไม่สำเร็จ
+
+  var ua = navigator.userAgent || "";
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) ||
+              (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); // iPadOS
+  var isMobile = isAndroid || isIOS || /Mobi/i.test(ua);
+
+  // เปิดแอปทันทีตั้งแต่เริ่มโหลดหน้า (เฉพาะ mobile)
+  if (isMobile) {
+    window.location.href = DEEP_LINK;
+  }
+</script>
+<style>
+  :root {
+    --bg: #eef3f8; --ink: #1d2a38; --muted: #5c6b7a; --accent: #2f6fed; --card: #ffffff;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121a24; --ink: #e6edf5; --muted: #93a3b5; --accent: #6b9bff; --card: #1c2632; }
+  }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "Sarabun", "Noto Sans Thai", system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .box { background: var(--card); border-radius: 16px; padding: 28px 24px; max-width: 420px; width: 100%; }
+  h1 { font-size: 1.4rem; margin: 0 0 8px; }
+  p { color: var(--muted); line-height: 1.6; margin: 0 0 20px; }
+  .btn {
+    display: block; text-align: center; background: var(--accent); color: #fff;
+    text-decoration: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 1rem;
+  }
+  .btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  pre {
+    margin: 20px 0 0; font-size: .78rem; white-space: pre-wrap; word-break: break-all;
+    color: var(--muted); background: var(--bg); padding: 12px; border-radius: 8px;
+  }
+</style>
+</head>
+<body>
+  <div class="box">
+    <h1 id="title">กำลังเปิดแอป Peepshare…</h1>
+    <p id="msg">ถ้าแอปไม่เปิดขึ้นมา กดปุ่มด้านล่างเพื่อลองอีกครั้ง</p>
+    <a class="btn" id="openBtn" href="#">เปิดในแอป</a>
+    <pre id="log"></pre>
+  </div>
+
+<script>
+  var logEl = document.getElementById("log");
+  function log(t) { logEl.textContent += "[" + new Date().toLocaleTimeString() + "] " + t + "\n"; }
+
+  document.getElementById("openBtn").href = DEEP_LINK;
+  log("UA: " + ua);
+  log("Platform: " + (isIOS ? "iOS" : isAndroid ? "Android" : "Desktop/อื่นๆ"));
+  log("Deep link: " + DEEP_LINK);
+
+  if (!isMobile) {
+    document.getElementById("title").textContent = "เปิดหน้านี้บนมือถือ";
+    document.getElementById("msg").textContent = "หน้านี้จะเปิดแอปอัตโนมัติเมื่อเข้าจากมือถือเท่านั้น";
+    log("ไม่ใช่ mobile – ไม่ redirect อัตโนมัติ");
+  } else {
+    log("Redirect ไปที่ deep link แล้ว");
+    var left = false;
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) { left = true; log("หน้าเว็บถูกซ่อน → น่าจะเปิดแอปสำเร็จ"); }
+    });
+    window.addEventListener("pagehide", function () { left = true; });
+    setTimeout(function () {
+      if (!left) {
+        document.getElementById("title").textContent = "ยังไม่ได้เปิดแอป";
+        document.getElementById("msg").textContent = "อาจยังไม่ได้ติดตั้งแอป หรือเบราว์เซอร์บล็อกการเปิดอัตโนมัติ ลองกดปุ่มด้านล่าง";
+        log("ผ่านไป " + FALLBACK_DELAY + "ms หน้ายังแสดงอยู่ → เปิดแอปไม่สำเร็จ");
+      }
+    }, FALLBACK_DELAY);
+  }
+</script>
+</body>
+</html>
